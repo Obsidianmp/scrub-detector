@@ -434,73 +434,110 @@ window.ScrubDetector = function ScrubDetector() {
 
   // Process Everflow data into our format
   const processEverflowData = (baseline, today) => {
-    const baselineMap = {};
-    const todayMap = {};
+    console.log('Processing data...', { baseline, today });
 
-    // Build baseline averages
-    (baseline.table || []).forEach(row => {
-      const key = `${row.columns[0]?.label || 'Unknown'}-${row.columns[1]?.label || 'Unknown'}`;
-      const clicks = row.reporting?.total_click || 0;
-      const convs = row.reporting?.cv || 0;
-      baselineMap[key] = {
-        campaign: row.columns[0]?.label || 'Unknown',
-        publisher: row.columns[1]?.label || 'Unknown',
-        clicks,
-        conversions: convs,
-        cvr: clicks > 0 ? (convs / clicks) * 100 : 0
-      };
-    });
+    // Check if we have table data (grouped by campaign/affiliate)
+    if (baseline.table && baseline.table.length > 0) {
+      // Process grouped data
+      const baselineMap = {};
+      const todayMap = {};
 
-    // Build today data
-    (today.table || []).forEach(row => {
-      const key = `${row.columns[0]?.label || 'Unknown'}-${row.columns[1]?.label || 'Unknown'}`;
-      const clicks = row.reporting?.total_click || 0;
-      const convs = row.reporting?.cv || 0;
-      todayMap[key] = {
-        campaign: row.columns[0]?.label || 'Unknown',
-        publisher: row.columns[1]?.label || 'Unknown',
-        clicks,
-        conversions: convs,
-        cvr: clicks > 0 ? (convs / clicks) * 100 : 0
-      };
-    });
+      baseline.table.forEach(row => {
+        const key = `${row.columns[0]?.label || 'Unknown'}-${row.columns[1]?.label || 'Unknown'}`;
+        const clicks = row.reporting?.total_click || 0;
+        const convs = row.reporting?.cv || 0;
+        baselineMap[key] = {
+          campaign: row.columns[0]?.label || 'Unknown',
+          publisher: row.columns[1]?.label || 'Unknown',
+          clicks,
+          conversions: convs,
+          cvr: clicks > 0 ? (convs / clicks) * 100 : 0
+        };
+      });
 
-    // Calculate CVR changes
-    const cvrResults = [];
-    const volResults = [];
-    let id = 1;
+      (today.table || []).forEach(row => {
+        const key = `${row.columns[0]?.label || 'Unknown'}-${row.columns[1]?.label || 'Unknown'}`;
+        const clicks = row.reporting?.total_click || 0;
+        const convs = row.reporting?.cv || 0;
+        todayMap[key] = {
+          campaign: row.columns[0]?.label || 'Unknown',
+          publisher: row.columns[1]?.label || 'Unknown',
+          clicks,
+          conversions: convs,
+          cvr: clicks > 0 ? (convs / clicks) * 100 : 0
+        };
+      });
 
-    Object.keys({ ...baselineMap, ...todayMap }).forEach(key => {
-      const base = baselineMap[key] || { cvr: 0, clicks: 0 };
-      const now = todayMap[key] || { cvr: 0, clicks: 0 };
-      
-      const avgCvr = base.cvr / (window - (excludeWeekends ? 2 : 0));
-      const cvrChange = avgCvr > 0 ? ((now.cvr - avgCvr) / avgCvr) * 100 : 0;
-      
-      const avgVol = base.clicks / (window - (excludeWeekends ? 2 : 0));
-      const volChange = avgVol > 0 ? ((now.clicks - avgVol) / avgVol) * 100 : 0;
+      const cvrResults = [];
+      const volResults = [];
+      let id = 1;
 
-      cvrResults.push({
-        id: id++,
-        campaign: base.campaign || now.campaign,
-        publisher: base.publisher || now.publisher,
+      Object.keys({ ...baselineMap, ...todayMap }).forEach(key => {
+        const base = baselineMap[key] || { cvr: 0, clicks: 0 };
+        const now = todayMap[key] || { cvr: 0, clicks: 0 };
+
+        const avgCvr = base.cvr / (window - (excludeWeekends ? 2 : 0));
+        const cvrChange = avgCvr > 0 ? ((now.cvr - avgCvr) / avgCvr) * 100 : 0;
+
+        const avgVol = base.clicks / (window - (excludeWeekends ? 2 : 0));
+        const volChange = avgVol > 0 ? ((now.clicks - avgVol) / avgVol) * 100 : 0;
+
+        cvrResults.push({
+          id: id++,
+          campaign: base.campaign || now.campaign,
+          publisher: base.publisher || now.publisher,
+          avgValue: parseFloat(avgCvr.toFixed(2)),
+          todayValue: parseFloat(now.cvr.toFixed(2)),
+          changePercent: Math.round(cvrChange)
+        });
+
+        volResults.push({
+          id: id++,
+          campaign: base.campaign || now.campaign,
+          publisher: base.publisher || now.publisher,
+          avgValue: Math.round(avgVol),
+          todayValue: now.clicks,
+          changePercent: Math.round(volChange)
+        });
+      });
+
+      setCvrData(cvrResults);
+      setVolumeData(volResults);
+    } else {
+      // Fallback: Process aggregate data
+      console.log('Using aggregate data fallback');
+      const baseClicks = baseline.total_click || 0;
+      const baseConvs = baseline.cv || 0;
+      const todayClicks = today.total_click || 0;
+      const todayConvs = today.cv || 0;
+
+      const baseCvr = baseClicks > 0 ? (baseConvs / baseClicks) * 100 : 0;
+      const todayCvr = todayClicks > 0 ? (todayConvs / todayClicks) * 100 : 0;
+
+      const avgCvr = baseCvr / (window - (excludeWeekends ? 2 : 0));
+      const cvrChange = avgCvr > 0 ? ((todayCvr - avgCvr) / avgCvr) * 100 : 0;
+
+      const avgVol = baseClicks / (window - (excludeWeekends ? 2 : 0));
+      const volChange = avgVol > 0 ? ((todayClicks - avgVol) / avgVol) * 100 : 0;
+
+      setCvrData([{
+        id: 1,
+        campaign: 'All Campaigns (Aggregate)',
+        publisher: 'All Publishers',
         avgValue: parseFloat(avgCvr.toFixed(2)),
-        todayValue: parseFloat(now.cvr.toFixed(2)),
+        todayValue: parseFloat(todayCvr.toFixed(2)),
         changePercent: Math.round(cvrChange)
-      });
+      }]);
 
-      volResults.push({
-        id: id++,
-        campaign: base.campaign || now.campaign,
-        publisher: base.publisher || now.publisher,
+      setVolumeData([{
+        id: 1,
+        campaign: 'All Campaigns (Aggregate)',
+        publisher: 'All Publishers',
         avgValue: Math.round(avgVol),
-        todayValue: now.clicks,
+        todayValue: todayClicks,
         changePercent: Math.round(volChange)
-      });
-    });
-
-    setCvrData(cvrResults);
-    setVolumeData(volResults);
+      }]);
+    }
   };
 
   const getStatus = (changePercent) => {
