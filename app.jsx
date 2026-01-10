@@ -318,6 +318,13 @@ window.ScrubDetector = function ScrubDetector() {
   // Get current data based on active tab
   const data = activeTab === 'scrub' ? cvrData : volumeData;
 
+  // Auto-refresh data when baseline settings change
+  React.useEffect(() => {
+    if (mode === 'live' && !loading) {
+      fetchLiveData();
+    }
+  }, [window, includeYesterday, excludeWeekends]);
+
   const theme = darkMode ? {
     bg: '#0f172a',
     bgSecondary: '#1e293b',
