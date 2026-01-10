@@ -443,6 +443,7 @@ window.ScrubDetector = function ScrubDetector() {
       const todayMap = {};
 
       baseline.table.forEach(row => {
+        console.log('Row columns:', row.columns); // Debug: check what columns we're getting
         const key = `${row.columns[0]?.label || 'Unknown'}-${row.columns[1]?.label || 'Unknown'}`;
         const clicks = row.reporting?.total_click || 0;
         const convs = row.reporting?.cv || 0;
