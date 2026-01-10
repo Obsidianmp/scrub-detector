@@ -18,7 +18,13 @@ export async function onRequest(context) {
   try {
     const body = await request.json();
 
-    const response = await fetch('https://api.eflow.team/v1/networks/reporting/entity/summary', {
+    // Use different endpoints based on whether grouping is requested
+    const hasColumns = body.columns && body.columns.length > 0;
+    const endpoint = hasColumns
+      ? 'https://api.eflow.team/v1/networks/reporting/entity-stats'
+      : 'https://api.eflow.team/v1/networks/reporting/entity/summary';
+
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
