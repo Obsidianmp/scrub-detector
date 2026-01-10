@@ -450,10 +450,10 @@ window.ScrubDetector = function ScrubDetector() {
       const todayMap = {};
 
       baseline.table.forEach(row => {
-        // Use columns[0] for campaign (offer) and columns[1] for publisher (affiliate)
-        // Note: We only request 2 columns, so affiliate should be at index 1
+        // Use columns[0] for campaign (offer) and columns[2] for publisher (affiliate)
+        // Note: Everflow returns 3 columns even though we only request 2: [offer, advertiser, affiliate]
         const campaign = row.columns[0]?.label || 'Unknown';
-        const publisher = row.columns[1]?.label || 'Unknown';
+        const publisher = row.columns[2]?.label || 'Unknown';
         const key = `${campaign}-${publisher}`;
         const clicks = row.reporting?.total_click || 0;
         const convs = row.reporting?.cv || 0;
@@ -480,10 +480,10 @@ window.ScrubDetector = function ScrubDetector() {
       });
 
       (today.table || []).forEach(row => {
-        // Use columns[0] for campaign (offer) and columns[1] for publisher (affiliate)
-        // Note: We only request 2 columns, so affiliate should be at index 1
+        // Use columns[0] for campaign (offer) and columns[2] for publisher (affiliate)
+        // Note: Everflow returns 3 columns even though we only request 2: [offer, advertiser, affiliate]
         const campaign = row.columns[0]?.label || 'Unknown';
-        const publisher = row.columns[1]?.label || 'Unknown';
+        const publisher = row.columns[2]?.label || 'Unknown';
         const key = `${campaign}-${publisher}`;
         const clicks = row.reporting?.total_click || 0;
         const convs = row.reporting?.cv || 0;
