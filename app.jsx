@@ -458,8 +458,9 @@ window.ScrubDetector = function ScrubDetector() {
         const fullCampaign = row.columns[0]?.label || 'Unknown';
         const publisher = row.columns[2]?.label || 'Unknown';
 
-        // Extract base campaign name (everything before first " - " to group similar campaigns)
-        const campaign = fullCampaign.split(' - ')[0];
+        // Extract base campaign name (first word to group campaign families)
+        // e.g., "Slotwise - First page" → "Slotwise", "Slotwise CPL - US Only" → "Slotwise"
+        const campaign = fullCampaign.split(/[\s-]/)[0];
 
         const key = `${campaign}-${publisher}`;
         const clicks = row.reporting?.total_click || 0;
@@ -492,8 +493,9 @@ window.ScrubDetector = function ScrubDetector() {
         const fullCampaign = row.columns[0]?.label || 'Unknown';
         const publisher = row.columns[2]?.label || 'Unknown';
 
-        // Extract base campaign name (everything before first " - " to group similar campaigns)
-        const campaign = fullCampaign.split(' - ')[0];
+        // Extract base campaign name (first word to group campaign families)
+        // e.g., "Slotwise - First page" → "Slotwise", "Slotwise CPL - US Only" → "Slotwise"
+        const campaign = fullCampaign.split(/[\s-]/)[0];
 
         const key = `${campaign}-${publisher}`;
         const clicks = row.reporting?.total_click || 0;
