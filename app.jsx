@@ -343,11 +343,15 @@ window.ScrubDetector = function ScrubDetector() {
     textMuted: '#94a3b8',
   };
 
-  // Helper to get date string
+  // Helper to get date string in local timezone (not UTC)
   const getDateStr = (daysAgo) => {
     const d = new Date();
     d.setDate(d.getDate() - daysAgo);
-    return d.toISOString().split('T')[0];
+    // Use local date components instead of toISOString() which converts to UTC
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
 
   // Connect to Everflow via proxy
@@ -366,7 +370,7 @@ window.ScrubDetector = function ScrubDetector() {
         body: JSON.stringify({
           from: getDateStr(0),
           to: getDateStr(0),
-          timezone_id: 67,
+          timezone_id: 80, // America/New_York (EST/EDT)
           currency_id: 'USD',
           columns: [{ column: 'offer' }],
           query: { filters: [] }
@@ -398,7 +402,7 @@ window.ScrubDetector = function ScrubDetector() {
         body: JSON.stringify({
           from: getDateStr(window),
           to: getDateStr(1),
-          timezone_id: 67,
+          timezone_id: 80, // America/New_York (EST/EDT)
           currency_id: 'USD',
           columns: [
             { column: 'offer' },
@@ -415,7 +419,7 @@ window.ScrubDetector = function ScrubDetector() {
         body: JSON.stringify({
           from: includeYesterday ? getDateStr(1) : getDateStr(0),
           to: getDateStr(0),
-          timezone_id: 67,
+          timezone_id: 80, // America/New_York (EST/EDT)
           currency_id: 'USD',
           columns: [
             { column: 'offer' },
@@ -459,11 +463,12 @@ window.ScrubDetector = function ScrubDetector() {
         const publisher = row.columns[2]?.label || 'Unknown';
         const key = `${campaign}-${publisher}`;
         const clicks = row.reporting?.total_click || 0;
+        // Use total_cv for all conversions, fallback to cv if not available
         const convs = row.reporting?.cv || 0;
 
-        // Debug logging for launch potato
-        if (campaign.toLowerCase().includes('launch') || campaign.toLowerCase().includes('potato')) {
-          console.log('Baseline row:', { campaign, publisher, clicks, convs, allColumns: row.columns });
+        // Debug logging for launch potato or slotwise
+        if (campaign.toLowerCase().includes('slotwise') || publisher.toLowerCase().includes('launch') || publisher.toLowerCase().includes('potato')) {
+          console.log('Baseline row:', { campaign, publisher, clicks, convs, reporting: row.reporting });
         }
 
         if (baselineMap[key]) {
@@ -489,11 +494,12 @@ window.ScrubDetector = function ScrubDetector() {
         const publisher = row.columns[2]?.label || 'Unknown';
         const key = `${campaign}-${publisher}`;
         const clicks = row.reporting?.total_click || 0;
+        // Use total_cv for all conversions, fallback to cv if not available
         const convs = row.reporting?.cv || 0;
 
-        // Debug logging for slotwise
-        if (campaign.toLowerCase().includes('slotwise')) {
-          console.log('Today row:', { campaign, publisher, clicks, convs, key, allColumns: row.columns });
+        // Debug logging for slotwise or launch potato
+        if (campaign.toLowerCase().includes('slotwise') || publisher.toLowerCase().includes('launch') || publisher.toLowerCase().includes('potato')) {
+          console.log('Today row:', { campaign, publisher, clicks, convs, key, reporting: row.reporting });
         }
 
         if (todayMap[key]) {
@@ -525,6 +531,9 @@ window.ScrubDetector = function ScrubDetector() {
       const volResults = [];
       let id = 1;
 
+      // Calculate days in current period for normalization
+      const currentPeriodDays = includeYesterday ? 2 : 1;
+
       Object.keys({ ...baselineMap, ...todayMap }).forEach(key => {
         const base = baselineMap[key] || { cvr: 0, clicks: 0, conversions: 0 };
         const now = todayMap[key] || { cvr: 0, clicks: 0, conversions: 0 };
@@ -537,14 +546,18 @@ window.ScrubDetector = function ScrubDetector() {
         const avgBaselineClicks = base.clicks / baselineDays;
         const avgBaselineConversions = base.conversions / baselineDays;
 
+        // Calculate current period daily averages for fair comparison
+        const avgCurrentClicks = now.clicks / currentPeriodDays;
+        const avgCurrentConversions = now.conversions / currentPeriodDays;
+
         // CVR Comparison: Compare today's CVR directly against baseline CVR
         // base.cvr is already the CVR% over the entire baseline period
         const baselineCvr = base.cvr;
         const todayCvr = now.cvr;
         const cvrChange = baselineCvr > 0 ? ((todayCvr - baselineCvr) / baselineCvr) * 100 : 0;
 
-        // Volume Comparison: Compare today's clicks against daily average baseline clicks
-        const volChange = avgBaselineClicks > 0 ? ((now.clicks - avgBaselineClicks) / avgBaselineClicks) * 100 : 0;
+        // Volume Comparison: Compare current period daily average clicks against baseline daily average
+        const volChange = avgBaselineClicks > 0 ? ((avgCurrentClicks - avgBaselineClicks) / avgBaselineClicks) * 100 : 0;
 
         // Calculate status priority for sorting (lower = worse)
         const cvrStatus = cvrChange >= 0 ? 3 : Math.abs(cvrChange) >= settings.scrubThreshold ? 0 : Math.abs(cvrChange) >= settings.warningThreshold ? 1 : 2;
@@ -558,9 +571,9 @@ window.ScrubDetector = function ScrubDetector() {
           todayValue: parseFloat(todayCvr.toFixed(2)),
           changePercent: Math.round(cvrChange),
           baselineClicks: Math.round(avgBaselineClicks),
-          todayClicks: now.clicks,
+          todayClicks: Math.round(avgCurrentClicks),
           baselineConversions: Math.round(avgBaselineConversions),
-          todayConversions: now.conversions,
+          todayConversions: Math.round(avgCurrentConversions),
           baselineTotalConversions: base.conversions, // Total conversions over baseline period
           status: cvrStatus
         });
@@ -570,12 +583,12 @@ window.ScrubDetector = function ScrubDetector() {
           campaign: base.campaign || now.campaign,
           publisher: base.publisher || now.publisher,
           avgValue: Math.round(avgBaselineClicks),
-          todayValue: now.clicks,
+          todayValue: Math.round(avgCurrentClicks),
           changePercent: Math.round(volChange),
           baselineClicks: Math.round(avgBaselineClicks),
-          todayClicks: now.clicks,
+          todayClicks: Math.round(avgCurrentClicks),
           baselineConversions: Math.round(avgBaselineConversions),
-          todayConversions: now.conversions,
+          todayConversions: Math.round(avgCurrentConversions),
           baselineTotalConversions: base.conversions, // Total conversions over baseline period
           status: volStatus
         });
@@ -591,20 +604,23 @@ window.ScrubDetector = function ScrubDetector() {
       const todayClicks = today.total_click || 0;
       const todayConvs = today.cv || 0;
 
+      // CVR is a rate - compare directly without dividing by days
       const baseCvr = baseClicks > 0 ? (baseConvs / baseClicks) * 100 : 0;
       const todayCvr = todayClicks > 0 ? (todayConvs / todayClicks) * 100 : 0;
+      const cvrChange = baseCvr > 0 ? ((todayCvr - baseCvr) / baseCvr) * 100 : 0;
 
-      const avgCvr = baseCvr / (window - (excludeWeekends ? 2 : 0));
-      const cvrChange = avgCvr > 0 ? ((todayCvr - avgCvr) / avgCvr) * 100 : 0;
-
-      const avgVol = baseClicks / (window - (excludeWeekends ? 2 : 0));
-      const volChange = avgVol > 0 ? ((todayClicks - avgVol) / avgVol) * 100 : 0;
+      // Volume needs to be normalized to daily averages
+      const baselineDays = window - (excludeWeekends ? 2 : 0);
+      const currentPeriodDays = includeYesterday ? 2 : 1;
+      const avgBaselineVol = baseClicks / baselineDays;
+      const avgCurrentVol = todayClicks / currentPeriodDays;
+      const volChange = avgBaselineVol > 0 ? ((avgCurrentVol - avgBaselineVol) / avgBaselineVol) * 100 : 0;
 
       setCvrData([{
         id: 1,
         campaign: 'All Campaigns (Aggregate)',
         publisher: 'All Publishers',
-        avgValue: parseFloat(avgCvr.toFixed(2)),
+        avgValue: parseFloat(baseCvr.toFixed(2)),
         todayValue: parseFloat(todayCvr.toFixed(2)),
         changePercent: Math.round(cvrChange)
       }]);
@@ -613,8 +629,8 @@ window.ScrubDetector = function ScrubDetector() {
         id: 1,
         campaign: 'All Campaigns (Aggregate)',
         publisher: 'All Publishers',
-        avgValue: Math.round(avgVol),
-        todayValue: todayClicks,
+        avgValue: Math.round(avgBaselineVol),
+        todayValue: Math.round(avgCurrentVol),
         changePercent: Math.round(volChange)
       }]);
     }
