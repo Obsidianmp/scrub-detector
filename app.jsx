@@ -449,6 +449,9 @@ window.ScrubDetector = function ScrubDetector() {
       const baselineMap = {};
       const todayMap = {};
 
+      console.log('Total baseline rows:', baseline.table.length);
+      console.log('Total today rows:', today.table?.length || 0);
+
       baseline.table.forEach(row => {
         // Use columns[0] for campaign (offer) and columns[2] for publisher (affiliate)
         // Note: Everflow returns 3 columns even though we only request 2: [offer, advertiser, affiliate]
@@ -490,11 +493,12 @@ window.ScrubDetector = function ScrubDetector() {
 
         // Debug logging for launch potato
         if (campaign.toLowerCase().includes('launch') || campaign.toLowerCase().includes('potato')) {
-          console.log('Today row:', { campaign, publisher, clicks, convs, allColumns: row.columns });
+          console.log('Today row:', { campaign, publisher, clicks, convs, key, allColumns: row.columns });
         }
 
         if (todayMap[key]) {
           // Aggregate if key already exists (multiple rows for same campaign/publisher)
+          console.log(`AGGREGATING: ${key} - adding ${convs} conversions to existing ${todayMap[key].conversions}`);
           todayMap[key].clicks += clicks;
           todayMap[key].conversions += convs;
           todayMap[key].cvr = todayMap[key].clicks > 0 ? (todayMap[key].conversions / todayMap[key].clicks) * 100 : 0;
@@ -506,6 +510,14 @@ window.ScrubDetector = function ScrubDetector() {
             conversions: convs,
             cvr: clicks > 0 ? (convs / clicks) * 100 : 0
           };
+        }
+      });
+
+      console.log('Final todayMap:', todayMap);
+      // Log launch potato final result
+      Object.keys(todayMap).forEach(key => {
+        if (key.toLowerCase().includes('launch') || key.toLowerCase().includes('potato')) {
+          console.log('FINAL launch potato:', key, todayMap[key]);
         }
       });
 
