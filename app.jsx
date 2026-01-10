@@ -450,10 +450,18 @@ window.ScrubDetector = function ScrubDetector() {
       const todayMap = {};
 
       baseline.table.forEach(row => {
-        // Use columns[0] for campaign (offer) and columns[2] for publisher (affiliate)
-        const key = `${row.columns[0]?.label || 'Unknown'}-${row.columns[2]?.label || 'Unknown'}`;
+        // Use columns[0] for campaign (offer) and columns[1] for publisher (affiliate)
+        // Note: We only request 2 columns, so affiliate should be at index 1
+        const campaign = row.columns[0]?.label || 'Unknown';
+        const publisher = row.columns[1]?.label || 'Unknown';
+        const key = `${campaign}-${publisher}`;
         const clicks = row.reporting?.total_click || 0;
         const convs = row.reporting?.cv || 0;
+
+        // Debug logging for launch potato
+        if (campaign.toLowerCase().includes('launch') || campaign.toLowerCase().includes('potato')) {
+          console.log('Baseline row:', { campaign, publisher, clicks, convs, allColumns: row.columns });
+        }
 
         if (baselineMap[key]) {
           // Aggregate if key already exists (multiple rows for same campaign/publisher)
@@ -462,8 +470,8 @@ window.ScrubDetector = function ScrubDetector() {
           baselineMap[key].cvr = baselineMap[key].clicks > 0 ? (baselineMap[key].conversions / baselineMap[key].clicks) * 100 : 0;
         } else {
           baselineMap[key] = {
-            campaign: row.columns[0]?.label || 'Unknown',
-            publisher: row.columns[2]?.label || 'Unknown',
+            campaign,
+            publisher,
             clicks,
             conversions: convs,
             cvr: clicks > 0 ? (convs / clicks) * 100 : 0
@@ -472,10 +480,18 @@ window.ScrubDetector = function ScrubDetector() {
       });
 
       (today.table || []).forEach(row => {
-        // Use columns[0] for campaign (offer) and columns[2] for publisher (affiliate)
-        const key = `${row.columns[0]?.label || 'Unknown'}-${row.columns[2]?.label || 'Unknown'}`;
+        // Use columns[0] for campaign (offer) and columns[1] for publisher (affiliate)
+        // Note: We only request 2 columns, so affiliate should be at index 1
+        const campaign = row.columns[0]?.label || 'Unknown';
+        const publisher = row.columns[1]?.label || 'Unknown';
+        const key = `${campaign}-${publisher}`;
         const clicks = row.reporting?.total_click || 0;
         const convs = row.reporting?.cv || 0;
+
+        // Debug logging for launch potato
+        if (campaign.toLowerCase().includes('launch') || campaign.toLowerCase().includes('potato')) {
+          console.log('Today row:', { campaign, publisher, clicks, convs, allColumns: row.columns });
+        }
 
         if (todayMap[key]) {
           // Aggregate if key already exists (multiple rows for same campaign/publisher)
@@ -484,8 +500,8 @@ window.ScrubDetector = function ScrubDetector() {
           todayMap[key].cvr = todayMap[key].clicks > 0 ? (todayMap[key].conversions / todayMap[key].clicks) * 100 : 0;
         } else {
           todayMap[key] = {
-            campaign: row.columns[0]?.label || 'Unknown',
-            publisher: row.columns[2]?.label || 'Unknown',
+            campaign,
+            publisher,
             clicks,
             conversions: convs,
             cvr: clicks > 0 ? (convs / clicks) * 100 : 0
@@ -1092,17 +1108,20 @@ window.ScrubDetector = function ScrubDetector() {
           <div onClick={() => handleSort('status')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
             Status {sortBy === 'status' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
-          <div onClick={() => handleSort('baselineConversions')} style={{ flex: 0.8, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            Baseline Avg {sortBy === 'baselineConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+          <div onClick={() => handleSort('baselineConversions')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+            Base Convs {sortBy === 'baselineConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+          </div>
+          <div onClick={() => handleSort('avgValue')} style={{ flex: 0.6, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+            Base CVR {sortBy === 'avgValue' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
           <div onClick={() => handleSort('todayClicks')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            Clicks {sortBy === 'todayClicks' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+            Today Clicks {sortBy === 'todayClicks' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
           <div onClick={() => handleSort('todayConversions')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            Convs {sortBy === 'todayConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+            Today Convs {sortBy === 'todayConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
           <div onClick={() => handleSort('todayValue')} style={{ flex: 0.6, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            CVR {sortBy === 'todayValue' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+            Today CVR {sortBy === 'todayValue' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
           <div onClick={() => handleSort('changePercent')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
             Change {sortBy === 'changePercent' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
@@ -1152,13 +1171,16 @@ window.ScrubDetector = function ScrubDetector() {
                   {statusConfig[status].label}
                 </span>
               </div>
-              <div style={{ flex: 0.8, textAlign: 'right' }}>
+              <div style={{ flex: 0.7, textAlign: 'right' }}>
                 <div style={{ fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>
                   {row.baselineConversions?.toLocaleString() || 0}
                 </div>
                 <div style={{ fontSize: '10px', color: theme.textMuted, marginTop: '2px' }}>
                   (avg/day)
                 </div>
+              </div>
+              <div style={{ flex: 0.6, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>
+                {activeTab === 'scrub' ? `${row.avgValue}%` : row.avgValue.toLocaleString()}
               </div>
               <div style={{ flex: 0.7, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
                 {row.todayClicks?.toLocaleString() || 0}
