@@ -454,13 +454,21 @@ window.ScrubDetector = function ScrubDetector() {
         const key = `${row.columns[0]?.label || 'Unknown'}-${row.columns[2]?.label || 'Unknown'}`;
         const clicks = row.reporting?.total_click || 0;
         const convs = row.reporting?.cv || 0;
-        baselineMap[key] = {
-          campaign: row.columns[0]?.label || 'Unknown',
-          publisher: row.columns[2]?.label || 'Unknown',
-          clicks,
-          conversions: convs,
-          cvr: clicks > 0 ? (convs / clicks) * 100 : 0
-        };
+
+        if (baselineMap[key]) {
+          // Aggregate if key already exists (multiple rows for same campaign/publisher)
+          baselineMap[key].clicks += clicks;
+          baselineMap[key].conversions += convs;
+          baselineMap[key].cvr = baselineMap[key].clicks > 0 ? (baselineMap[key].conversions / baselineMap[key].clicks) * 100 : 0;
+        } else {
+          baselineMap[key] = {
+            campaign: row.columns[0]?.label || 'Unknown',
+            publisher: row.columns[2]?.label || 'Unknown',
+            clicks,
+            conversions: convs,
+            cvr: clicks > 0 ? (convs / clicks) * 100 : 0
+          };
+        }
       });
 
       (today.table || []).forEach(row => {
@@ -468,13 +476,21 @@ window.ScrubDetector = function ScrubDetector() {
         const key = `${row.columns[0]?.label || 'Unknown'}-${row.columns[2]?.label || 'Unknown'}`;
         const clicks = row.reporting?.total_click || 0;
         const convs = row.reporting?.cv || 0;
-        todayMap[key] = {
-          campaign: row.columns[0]?.label || 'Unknown',
-          publisher: row.columns[2]?.label || 'Unknown',
-          clicks,
-          conversions: convs,
-          cvr: clicks > 0 ? (convs / clicks) * 100 : 0
-        };
+
+        if (todayMap[key]) {
+          // Aggregate if key already exists (multiple rows for same campaign/publisher)
+          todayMap[key].clicks += clicks;
+          todayMap[key].conversions += convs;
+          todayMap[key].cvr = todayMap[key].clicks > 0 ? (todayMap[key].conversions / todayMap[key].clicks) * 100 : 0;
+        } else {
+          todayMap[key] = {
+            campaign: row.columns[0]?.label || 'Unknown',
+            publisher: row.columns[2]?.label || 'Unknown',
+            clicks,
+            conversions: convs,
+            cvr: clicks > 0 ? (convs / clicks) * 100 : 0
+          };
+        }
       });
 
       const cvrResults = [];
@@ -1076,8 +1092,8 @@ window.ScrubDetector = function ScrubDetector() {
           <div onClick={() => handleSort('status')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
             Status {sortBy === 'status' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
-          <div onClick={() => handleSort('baselineTotalConversions')} style={{ flex: 0.8, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            Baseline Convs {sortBy === 'baselineTotalConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+          <div onClick={() => handleSort('baselineConversions')} style={{ flex: 0.8, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+            Baseline Avg {sortBy === 'baselineConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
           <div onClick={() => handleSort('todayClicks')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
             Clicks {sortBy === 'todayClicks' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
@@ -1138,10 +1154,10 @@ window.ScrubDetector = function ScrubDetector() {
               </div>
               <div style={{ flex: 0.8, textAlign: 'right' }}>
                 <div style={{ fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>
-                  {row.baselineTotalConversions?.toLocaleString() || 0}
+                  {row.baselineConversions?.toLocaleString() || 0}
                 </div>
                 <div style={{ fontSize: '10px', color: theme.textMuted, marginTop: '2px' }}>
-                  ({window} days)
+                  (avg/day)
                 </div>
               </div>
               <div style={{ flex: 0.7, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
