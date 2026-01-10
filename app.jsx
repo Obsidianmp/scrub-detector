@@ -476,6 +476,9 @@ window.ScrubDetector = function ScrubDetector() {
         const base = baselineMap[key] || { cvr: 0, clicks: 0 };
         const now = todayMap[key] || { cvr: 0, clicks: 0 };
 
+        // Skip campaigns with no clicks today
+        if (now.clicks === 0) return;
+
         const avgCvr = base.cvr / (window - (excludeWeekends ? 2 : 0));
         const cvrChange = avgCvr > 0 ? ((now.cvr - avgCvr) / avgCvr) * 100 : 0;
 
