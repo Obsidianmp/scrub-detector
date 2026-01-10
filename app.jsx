@@ -443,13 +443,13 @@ window.ScrubDetector = function ScrubDetector() {
       const todayMap = {};
 
       baseline.table.forEach(row => {
-        console.log('Row columns:', row.columns); // Debug: check what columns we're getting
-        const key = `${row.columns[0]?.label || 'Unknown'}-${row.columns[1]?.label || 'Unknown'}`;
+        // Use columns[0] for campaign (offer) and columns[2] for publisher (affiliate)
+        const key = `${row.columns[0]?.label || 'Unknown'}-${row.columns[2]?.label || 'Unknown'}`;
         const clicks = row.reporting?.total_click || 0;
         const convs = row.reporting?.cv || 0;
         baselineMap[key] = {
           campaign: row.columns[0]?.label || 'Unknown',
-          publisher: row.columns[1]?.label || 'Unknown',
+          publisher: row.columns[2]?.label || 'Unknown',
           clicks,
           conversions: convs,
           cvr: clicks > 0 ? (convs / clicks) * 100 : 0
@@ -457,12 +457,13 @@ window.ScrubDetector = function ScrubDetector() {
       });
 
       (today.table || []).forEach(row => {
-        const key = `${row.columns[0]?.label || 'Unknown'}-${row.columns[1]?.label || 'Unknown'}`;
+        // Use columns[0] for campaign (offer) and columns[2] for publisher (affiliate)
+        const key = `${row.columns[0]?.label || 'Unknown'}-${row.columns[2]?.label || 'Unknown'}`;
         const clicks = row.reporting?.total_click || 0;
         const convs = row.reporting?.cv || 0;
         todayMap[key] = {
           campaign: row.columns[0]?.label || 'Unknown',
-          publisher: row.columns[1]?.label || 'Unknown',
+          publisher: row.columns[2]?.label || 'Unknown',
           clicks,
           conversions: convs,
           cvr: clicks > 0 ? (convs / clicks) * 100 : 0
