@@ -18,8 +18,11 @@ export async function onRequest(context) {
   try {
     const body = await request.json();
 
-    // Always use the summary endpoint for now
-    const endpoint = 'https://api.eflow.team/v1/networks/reporting/entity/summary';
+    // Use table endpoint for dimensional data, summary for aggregates
+    const hasColumns = body.columns && body.columns.length > 0;
+    const endpoint = hasColumns
+      ? 'https://api.eflow.team/v1/networks/reporting/entity/table'
+      : 'https://api.eflow.team/v1/networks/reporting/entity/summary';
 
     const response = await fetch(endpoint, {
       method: 'POST',
