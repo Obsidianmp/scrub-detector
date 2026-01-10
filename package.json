@@ -1,0 +1,8 @@
+{
+  "name": "scrub-detector",
+  "version": "1.0.0",
+  "description": "Monitor Everflow campaigns for CVR drops and volume changes",
+  "scripts": {
+    "build": "echo 'No build needed - static site'"
+  }
+}
