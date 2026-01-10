@@ -301,8 +301,8 @@ window.ScrubDetector = function ScrubDetector() {
   const [window, setWindow] = useState(10);
   const [includeYesterday, setIncludeYesterday] = useState(false);
   const [excludeWeekends, setExcludeWeekends] = useState(true);
-  const [sortBy, setSortBy] = useState('status');
-  const [sortAsc, setSortAsc] = useState(true);
+  const [sortBy, setSortBy] = useState('todayClicks');
+  const [sortAsc, setSortAsc] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -966,164 +966,182 @@ window.ScrubDetector = function ScrubDetector() {
       {(activeTab === 'scrub' || activeTab === 'volume') && (
         <>
       {/* Summary Cards */}
-      <div style={{ padding: '16px 20px', display: 'flex', gap: '10px', background: theme.bgSecondary, borderBottom: `1px solid ${theme.border}` }}>
-        <div style={{ flex: 1, padding: '12px', background: scrubCount > 0 ? (darkMode ? 'rgba(220,38,38,0.15)' : '#fef2f2') : theme.bgTertiary, border: `1px solid ${scrubCount > 0 ? (darkMode ? 'rgba(220,38,38,0.3)' : '#fecaca') : theme.border}`, borderRadius: '12px', textAlign: 'center' }}>
-          <div style={{ fontSize: '22px', fontWeight: '700', color: '#dc2626' }}>{scrubCount}</div>
-          <div style={{ fontSize: '10px', color: theme.textSecondary, fontWeight: '500' }}>{activeTab === 'scrub' ? 'Scrub Likely' : 'Major Drop'}</div>
+      <div style={{ padding: '20px', display: 'flex', gap: '12px', background: theme.bg }}>
+        <div style={{ flex: 1, padding: '16px 20px', background: theme.bgSecondary, border: `2px solid ${scrubCount > 0 ? '#dc2626' : theme.border}`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: '11px', color: theme.textSecondary, fontWeight: '600', textTransform: 'uppercase', marginBottom: '4px' }}>{activeTab === 'scrub' ? 'Scrub Likely' : 'Major Drop'}</div>
+            <div style={{ fontSize: '28px', fontWeight: '700', color: '#dc2626' }}>{scrubCount}</div>
+          </div>
+          <div style={{ width: '48px', height: '48px', background: 'rgba(220,38,38,0.15)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: '24px' }}>🚨</span>
+          </div>
         </div>
-        <div style={{ flex: 1, padding: '12px', background: warningCount > 0 ? (darkMode ? 'rgba(217,119,6,0.15)' : '#fffbeb') : theme.bgTertiary, border: `1px solid ${warningCount > 0 ? (darkMode ? 'rgba(217,119,6,0.3)' : '#fde68a') : theme.border}`, borderRadius: '12px', textAlign: 'center' }}>
-          <div style={{ fontSize: '22px', fontWeight: '700', color: '#d97706' }}>{warningCount}</div>
-          <div style={{ fontSize: '10px', color: theme.textSecondary, fontWeight: '500' }}>Warning</div>
+        <div style={{ flex: 1, padding: '16px 20px', background: theme.bgSecondary, border: `2px solid ${warningCount > 0 ? '#d97706' : theme.border}`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: '11px', color: theme.textSecondary, fontWeight: '600', textTransform: 'uppercase', marginBottom: '4px' }}>Warning</div>
+            <div style={{ fontSize: '28px', fontWeight: '700', color: '#d97706' }}>{warningCount}</div>
+          </div>
+          <div style={{ width: '48px', height: '48px', background: 'rgba(217,119,6,0.15)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: '24px' }}>⚠️</span>
+          </div>
         </div>
-        <div style={{ flex: 1, padding: '12px', background: theme.bgTertiary, border: `1px solid ${theme.border}`, borderRadius: '12px', textAlign: 'center' }}>
-          <div style={{ fontSize: '22px', fontWeight: '700', color: '#16a34a' }}>{healthyCount}</div>
-          <div style={{ fontSize: '10px', color: theme.textSecondary, fontWeight: '500' }}>Healthy</div>
+        <div style={{ flex: 1, padding: '16px 20px', background: theme.bgSecondary, border: `2px solid ${theme.border}`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: '11px', color: theme.textSecondary, fontWeight: '600', textTransform: 'uppercase', marginBottom: '4px' }}>Healthy</div>
+            <div style={{ fontSize: '28px', fontWeight: '700', color: '#16a34a' }}>{healthyCount}</div>
+          </div>
+          <div style={{ width: '48px', height: '48px', background: 'rgba(34,197,94,0.15)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: '24px' }}>✅</span>
+          </div>
         </div>
       </div>
 
       {/* Controls */}
-      <div style={{ padding: '16px 20px', background: theme.bgSecondary, borderBottom: `1px solid ${theme.border}` }}>
-        <div style={{ marginBottom: '12px' }}>
-          <label style={{ fontSize: '12px', fontWeight: '600', color: theme.textSecondary, display: 'block', marginBottom: '8px' }}>
-            Baseline Window
-          </label>
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-            {[5, 10, 30].map((days) => (
-              <button key={days} onClick={() => setWindow(days)} style={{
-                flex: 1, padding: '10px', background: window === days ? '#3b82f6' : theme.bgTertiary,
-                border: `1px solid ${window === days ? '#3b82f6' : theme.border}`, borderRadius: '10px',
-                color: window === days ? '#fff' : theme.textSecondary, fontSize: '14px', fontWeight: '600', cursor: 'pointer',
-              }}>
-                {days}-Day
-              </button>
-            ))}
-          </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: theme.bgTertiary, borderRadius: '10px' }}>
-            <span style={{ fontSize: '13px', color: theme.textSecondary }}>Weekends:</span>
-            <div style={{ display: 'flex', gap: '6px' }}>
-              <button onClick={() => setExcludeWeekends(true)} style={{
-                padding: '8px 14px', background: excludeWeekends ? '#3b82f6' : 'transparent',
-                border: `1px solid ${excludeWeekends ? '#3b82f6' : theme.border}`, borderRadius: '8px',
-                color: excludeWeekends ? '#fff' : theme.textSecondary, fontSize: '12px', fontWeight: '500', cursor: 'pointer',
-              }}>Excluded</button>
-              <button onClick={() => setExcludeWeekends(false)} style={{
-                padding: '8px 14px', background: !excludeWeekends ? '#3b82f6' : 'transparent',
-                border: `1px solid ${!excludeWeekends ? '#3b82f6' : theme.border}`, borderRadius: '8px',
-                color: !excludeWeekends ? '#fff' : theme.textSecondary, fontSize: '12px', fontWeight: '500', cursor: 'pointer',
-              }}>Included</button>
+      <div style={{ padding: '20px', background: theme.bg }}>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 300px', background: theme.bgSecondary, padding: '16px', borderRadius: '12px', border: `1px solid ${theme.border}` }}>
+            <label style={{ fontSize: '11px', fontWeight: '600', color: theme.textSecondary, display: 'block', marginBottom: '10px', textTransform: 'uppercase' }}>
+              Baseline Period
+            </label>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {[5, 10, 30].map((days) => (
+                <button key={days} onClick={() => setWindow(days)} style={{
+                  flex: 1, padding: '10px', background: window === days ? '#3b82f6' : 'transparent',
+                  border: `2px solid ${window === days ? '#3b82f6' : theme.border}`, borderRadius: '8px',
+                  color: window === days ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}>
+                  {days} Days
+                </button>
+              ))}
             </div>
           </div>
-        </div>
-        
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: theme.bgTertiary, borderRadius: '10px' }}>
-          <span style={{ fontSize: '13px', color: theme.textSecondary }}>Compare against:</span>
-          <div style={{ display: 'flex', gap: '6px' }}>
-            <button onClick={() => setIncludeYesterday(false)} style={{
-              padding: '8px 14px', background: !includeYesterday ? '#3b82f6' : 'transparent',
-              border: `1px solid ${!includeYesterday ? '#3b82f6' : theme.border}`, borderRadius: '8px',
-              color: !includeYesterday ? '#fff' : theme.textSecondary, fontSize: '12px', fontWeight: '500', cursor: 'pointer',
-            }}>Today</button>
-            <button onClick={() => setIncludeYesterday(true)} style={{
-              padding: '8px 14px', background: includeYesterday ? '#3b82f6' : 'transparent',
-              border: `1px solid ${includeYesterday ? '#3b82f6' : theme.border}`, borderRadius: '8px',
-              color: includeYesterday ? '#fff' : theme.textSecondary, fontSize: '12px', fontWeight: '500', cursor: 'pointer',
-            }}>Today + Yesterday</button>
+
+          <div style={{ flex: '1 1 300px', background: theme.bgSecondary, padding: '16px', borderRadius: '12px', border: `1px solid ${theme.border}` }}>
+            <label style={{ fontSize: '11px', fontWeight: '600', color: theme.textSecondary, display: 'block', marginBottom: '10px', textTransform: 'uppercase' }}>
+              Current Period
+            </label>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setIncludeYesterday(false)} style={{
+                flex: 1, padding: '10px', background: !includeYesterday ? '#3b82f6' : 'transparent',
+                border: `2px solid ${!includeYesterday ? '#3b82f6' : theme.border}`, borderRadius: '8px',
+                color: !includeYesterday ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}>Today Only</button>
+              <button onClick={() => setIncludeYesterday(true)} style={{
+                flex: 1, padding: '10px', background: includeYesterday ? '#3b82f6' : 'transparent',
+                border: `2px solid ${includeYesterday ? '#3b82f6' : theme.border}`, borderRadius: '8px',
+                color: includeYesterday ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}>Last 2 Days</button>
+            </div>
+          </div>
+
+          <div style={{ flex: '0 1 auto', background: theme.bgSecondary, padding: '16px', borderRadius: '12px', border: `1px solid ${theme.border}` }}>
+            <label style={{ fontSize: '11px', fontWeight: '600', color: theme.textSecondary, display: 'block', marginBottom: '10px', textTransform: 'uppercase' }}>
+              Include Weekends
+            </label>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => setExcludeWeekends(false)} style={{
+                padding: '10px 16px', background: !excludeWeekends ? '#16a34a' : 'transparent',
+                border: `2px solid ${!excludeWeekends ? '#16a34a' : theme.border}`, borderRadius: '8px',
+                color: !excludeWeekends ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}>Yes</button>
+              <button onClick={() => setExcludeWeekends(true)} style={{
+                padding: '10px 16px', background: excludeWeekends ? '#ef4444' : 'transparent',
+                border: `2px solid ${excludeWeekends ? '#ef4444' : theme.border}`, borderRadius: '8px',
+                color: excludeWeekends ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}>No</button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Table Header */}
-      <div style={{ padding: '12px 20px', background: theme.bgTertiary, borderBottom: `1px solid ${theme.border}`, display: 'flex', gap: '8px', alignItems: 'center' }}>
-        <div style={{ flex: 2, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase' }}>Campaign / Publisher</div>
-        <div onClick={() => handleSort('status')} style={{ flex: 0.8, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'center' }}>
-          Status {sortBy === 'status' && (sortAsc ? '↑' : '↓')}
-        </div>
-        <div onClick={() => handleSort('baselineClicks')} style={{ flex: 0.7, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
-          {window}D Clicks {sortBy === 'baselineClicks' && (sortAsc ? '↑' : '↓')}
-        </div>
-        <div onClick={() => handleSort('todayClicks')} style={{ flex: 0.7, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
-          Today Clicks {sortBy === 'todayClicks' && (sortAsc ? '↑' : '↓')}
-        </div>
-        <div onClick={() => handleSort('baselineConversions')} style={{ flex: 0.7, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
-          {window}D Convs {sortBy === 'baselineConversions' && (sortAsc ? '↑' : '↓')}
-        </div>
-        <div onClick={() => handleSort('todayConversions')} style={{ flex: 0.7, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
-          Today Convs {sortBy === 'todayConversions' && (sortAsc ? '↑' : '↓')}
-        </div>
-        <div onClick={() => handleSort('avgValue')} style={{ flex: 0.7, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
-          {window}D {activeTab === 'scrub' ? 'CVR' : 'Vol'} {sortBy === 'avgValue' && (sortAsc ? '↑' : '↓')}
-        </div>
-        <div onClick={() => handleSort('todayValue')} style={{ flex: 0.7, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
-          Today {activeTab === 'scrub' ? 'CVR' : 'Vol'} {sortBy === 'todayValue' && (sortAsc ? '↑' : '↓')}
-        </div>
-        <div onClick={() => handleSort('changePercent')} style={{ flex: 0.7, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
-          Change {sortBy === 'changePercent' && (sortAsc ? '↑' : '↓')}
+      <div style={{ padding: '16px 20px 12px', background: theme.bg }}>
+        <div style={{ display: 'flex', gap: '12px', padding: '12px 16px', background: theme.bgSecondary, borderRadius: '10px 10px 0 0', border: `1px solid ${theme.border}`, borderBottom: 'none' }}>
+          <div style={{ flex: 2.5, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Campaign / Publisher</div>
+          <div onClick={() => handleSort('status')} style={{ flex: 0.8, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+            Status {sortBy === 'status' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+          </div>
+          <div onClick={() => handleSort('todayClicks')} style={{ flex: 0.8, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+            Clicks (Today) {sortBy === 'todayClicks' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+          </div>
+          <div onClick={() => handleSort('todayConversions')} style={{ flex: 0.8, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+            Conversions {sortBy === 'todayConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+          </div>
+          <div onClick={() => handleSort('todayValue')} style={{ flex: 0.8, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+            CVR (Today) {sortBy === 'todayValue' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+          </div>
+          <div onClick={() => handleSort('changePercent')} style={{ flex: 0.8, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+            Change {sortBy === 'changePercent' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+          </div>
         </div>
       </div>
 
       {/* Table Rows */}
-      <div style={{ padding: '0 20px 20px' }}>
-        {sortedData.map((row) => {
+      <div style={{ padding: '0 20px 20px', background: theme.bg }}>
+        {sortedData.map((row, idx) => {
           const status = getStatus(row.changePercent);
           const colors = getStatusColor(status);
-          const statusLabel = status === 'scrub' ? (activeTab === 'scrub' ? 'Scrub' : 'Drop') : status === 'warning' ? 'Warning' : 'Healthy';
+          const statusConfig = {
+            scrub: { label: '🚨 Alert', color: '#dc2626' },
+            warning: { label: '⚠️ Watch', color: '#d97706' },
+            healthy: { label: '✅ Good', color: '#16a34a' }
+          };
           return (
             <div key={row.id} style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '12px 16px',
-              background: colors.bg,
-              borderLeft: `4px solid ${colors.text}`,
-              borderRadius: '10px',
-              marginTop: '8px',
+              gap: '12px',
+              padding: '16px',
+              background: theme.bgSecondary,
+              border: `1px solid ${theme.border}`,
+              borderTop: idx === 0 ? `1px solid ${theme.border}` : 'none',
+              borderRadius: idx === 0 ? '0' : '0',
+              transition: 'all 0.2s',
             }}>
-              <div style={{ flex: 2 }}>
-                <div style={{ fontSize: '13px', fontWeight: '600', color: theme.text, marginBottom: '2px' }}>{row.campaign}</div>
-                <div style={{ fontSize: '11px', color: theme.textSecondary }}>{row.publisher}</div>
+              <div style={{ flex: 2.5 }}>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: theme.text, marginBottom: '4px' }}>{row.campaign}</div>
+                <div style={{ fontSize: '12px', color: theme.textSecondary }}>{row.publisher}</div>
               </div>
               <div style={{ flex: 0.8, textAlign: 'center' }}>
                 <span style={{
-                  display: 'inline-block',
-                  fontSize: '10px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '11px',
                   fontWeight: '700',
-                  color: colors.text,
-                  background: darkMode ? `${colors.text}22` : `${colors.text}11`,
-                  padding: '4px 8px',
+                  color: statusConfig[status].color,
+                  background: `${statusConfig[status].color}15`,
+                  padding: '6px 10px',
                   borderRadius: '6px',
-                  textTransform: 'uppercase',
+                  border: `1px solid ${statusConfig[status].color}40`,
                 }}>
-                  {statusLabel}
+                  {statusConfig[status].label}
                 </span>
               </div>
-              <div style={{ flex: 0.7, textAlign: 'right', fontSize: '13px', fontWeight: '500', color: theme.textSecondary }}>
-                {row.baselineClicks?.toLocaleString() || 0}
-              </div>
-              <div style={{ flex: 0.7, textAlign: 'right', fontSize: '13px', fontWeight: '600', color: theme.text }}>
+              <div style={{ flex: 0.8, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
                 {row.todayClicks?.toLocaleString() || 0}
               </div>
-              <div style={{ flex: 0.7, textAlign: 'right', fontSize: '13px', fontWeight: '500', color: theme.textSecondary }}>
-                {row.baselineConversions?.toLocaleString() || 0}
-              </div>
-              <div style={{ flex: 0.7, textAlign: 'right', fontSize: '13px', fontWeight: '600', color: theme.text }}>
+              <div style={{ flex: 0.8, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
                 {row.todayConversions?.toLocaleString() || 0}
               </div>
-              <div style={{ flex: 0.7, textAlign: 'right', fontSize: '13px', fontWeight: '500', color: theme.textSecondary }}>
-                {activeTab === 'scrub' ? `${row.avgValue}%` : row.avgValue.toLocaleString()}
-              </div>
-              <div style={{ flex: 0.7, textAlign: 'right', fontSize: '13px', fontWeight: '600', color: theme.text }}>
+              <div style={{ flex: 0.8, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
                 {activeTab === 'scrub' ? `${row.todayValue}%` : row.todayValue.toLocaleString()}
               </div>
-              <div style={{ flex: 0.7, textAlign: 'right' }}>
+              <div style={{ flex: 0.8, textAlign: 'right' }}>
                 <span style={{
                   display: 'inline-block',
-                  padding: '4px 8px',
-                  background: status === 'healthy' ? (darkMode ? 'rgba(34,197,94,0.2)' : '#dcfce7') : 'transparent',
+                  padding: '6px 12px',
+                  background: row.changePercent >= 0 ? 'rgba(34,197,94,0.15)' : 'rgba(220,38,38,0.15)',
                   borderRadius: '6px',
-                  fontSize: '13px',
+                  fontSize: '14px',
                   fontWeight: '700',
-                  color: colors.text,
+                  color: row.changePercent >= 0 ? '#16a34a' : '#dc2626',
+                  border: `1px solid ${row.changePercent >= 0 ? 'rgba(34,197,94,0.3)' : 'rgba(220,38,38,0.3)'}`,
                 }}>
                   {row.changePercent > 0 ? '+' : ''}{row.changePercent}%
                 </span>
