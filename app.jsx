@@ -301,7 +301,7 @@ window.ScrubDetector = function ScrubDetector() {
   const [window, setWindow] = useState(10);
   const [includeYesterday, setIncludeYesterday] = useState(false);
   const [excludeWeekends, setExcludeWeekends] = useState(true);
-  const [sortBy, setSortBy] = useState('changePercent');
+  const [sortBy, setSortBy] = useState('status');
   const [sortAsc, setSortAsc] = useState(true);
   const [apiKey, setApiKey] = useState('');
   const [showSettings, setShowSettings] = useState(false);
@@ -473,8 +473,8 @@ window.ScrubDetector = function ScrubDetector() {
       let id = 1;
 
       Object.keys({ ...baselineMap, ...todayMap }).forEach(key => {
-        const base = baselineMap[key] || { cvr: 0, clicks: 0 };
-        const now = todayMap[key] || { cvr: 0, clicks: 0 };
+        const base = baselineMap[key] || { cvr: 0, clicks: 0, conversions: 0 };
+        const now = todayMap[key] || { cvr: 0, clicks: 0, conversions: 0 };
 
         // Skip campaigns with no clicks today
         if (now.clicks === 0) return;
@@ -485,13 +485,22 @@ window.ScrubDetector = function ScrubDetector() {
         const avgVol = base.clicks / (window - (excludeWeekends ? 2 : 0));
         const volChange = avgVol > 0 ? ((now.clicks - avgVol) / avgVol) * 100 : 0;
 
+        // Calculate status priority for sorting (lower = worse)
+        const cvrStatus = cvrChange >= 0 ? 3 : Math.abs(cvrChange) >= settings.scrubThreshold ? 0 : Math.abs(cvrChange) >= settings.warningThreshold ? 1 : 2;
+        const volStatus = volChange >= 0 ? 3 : Math.abs(volChange) >= settings.volumeDropThreshold ? 0 : Math.abs(volChange) >= settings.volumeWarningThreshold ? 1 : 2;
+
         cvrResults.push({
           id: id++,
           campaign: base.campaign || now.campaign,
           publisher: base.publisher || now.publisher,
           avgValue: parseFloat(avgCvr.toFixed(2)),
           todayValue: parseFloat(now.cvr.toFixed(2)),
-          changePercent: Math.round(cvrChange)
+          changePercent: Math.round(cvrChange),
+          baselineClicks: base.clicks,
+          todayClicks: now.clicks,
+          baselineConversions: base.conversions,
+          todayConversions: now.conversions,
+          status: cvrStatus
         });
 
         volResults.push({
@@ -500,7 +509,12 @@ window.ScrubDetector = function ScrubDetector() {
           publisher: base.publisher || now.publisher,
           avgValue: Math.round(avgVol),
           todayValue: now.clicks,
-          changePercent: Math.round(volChange)
+          changePercent: Math.round(volChange),
+          baselineClicks: base.clicks,
+          todayClicks: now.clicks,
+          baselineConversions: base.conversions,
+          todayConversions: now.conversions,
+          status: volStatus
         });
       });
 
@@ -1011,15 +1025,30 @@ window.ScrubDetector = function ScrubDetector() {
       </div>
 
       {/* Table Header */}
-      <div style={{ padding: '12px 20px', background: theme.bgTertiary, borderBottom: `1px solid ${theme.border}`, display: 'flex', gap: '8px' }}>
+      <div style={{ padding: '12px 20px', background: theme.bgTertiary, borderBottom: `1px solid ${theme.border}`, display: 'flex', gap: '8px', alignItems: 'center' }}>
         <div style={{ flex: 2, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase' }}>Campaign / Publisher</div>
-        <div onClick={() => handleSort('avgValue')} style={{ flex: 1, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
-          {window}D {activeTab === 'scrub' ? 'Avg' : 'Vol'} {sortBy === 'avgValue' && (sortAsc ? '↑' : '↓')}
+        <div onClick={() => handleSort('status')} style={{ flex: 0.8, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'center' }}>
+          Status {sortBy === 'status' && (sortAsc ? '↑' : '↓')}
         </div>
-        <div onClick={() => handleSort('todayValue')} style={{ flex: 1, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
-          {includeYesterday ? 'T+Y' : 'Today'} {sortBy === 'todayValue' && (sortAsc ? '↑' : '↓')}
+        <div onClick={() => handleSort('baselineClicks')} style={{ flex: 0.7, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
+          {window}D Clicks {sortBy === 'baselineClicks' && (sortAsc ? '↑' : '↓')}
         </div>
-        <div onClick={() => handleSort('changePercent')} style={{ flex: 1, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
+        <div onClick={() => handleSort('todayClicks')} style={{ flex: 0.7, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
+          Today Clicks {sortBy === 'todayClicks' && (sortAsc ? '↑' : '↓')}
+        </div>
+        <div onClick={() => handleSort('baselineConversions')} style={{ flex: 0.7, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
+          {window}D Convs {sortBy === 'baselineConversions' && (sortAsc ? '↑' : '↓')}
+        </div>
+        <div onClick={() => handleSort('todayConversions')} style={{ flex: 0.7, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
+          Today Convs {sortBy === 'todayConversions' && (sortAsc ? '↑' : '↓')}
+        </div>
+        <div onClick={() => handleSort('avgValue')} style={{ flex: 0.7, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
+          {window}D {activeTab === 'scrub' ? 'CVR' : 'Vol'} {sortBy === 'avgValue' && (sortAsc ? '↑' : '↓')}
+        </div>
+        <div onClick={() => handleSort('todayValue')} style={{ flex: 0.7, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
+          Today {activeTab === 'scrub' ? 'CVR' : 'Vol'} {sortBy === 'todayValue' && (sortAsc ? '↑' : '↓')}
+        </div>
+        <div onClick={() => handleSort('changePercent')} style={{ flex: 0.7, fontSize: '11px', fontWeight: '600', color: theme.textSecondary, textTransform: 'uppercase', cursor: 'pointer', textAlign: 'right' }}>
           Change {sortBy === 'changePercent' && (sortAsc ? '↑' : '↓')}
         </div>
       </div>
@@ -1029,69 +1058,61 @@ window.ScrubDetector = function ScrubDetector() {
         {sortedData.map((row) => {
           const status = getStatus(row.changePercent);
           const colors = getStatusColor(status);
+          const statusLabel = status === 'scrub' ? (activeTab === 'scrub' ? 'Scrub' : 'Drop') : status === 'warning' ? 'Warning' : 'Healthy';
           return (
             <div key={row.id} style={{
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '14px 16px',
+              padding: '12px 16px',
               background: colors.bg,
               borderLeft: `4px solid ${colors.text}`,
               borderRadius: '10px',
               marginTop: '8px',
             }}>
               <div style={{ flex: 2 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                  <span style={{ fontSize: '14px', fontWeight: '600', color: theme.text }}>{row.campaign}</span>
-                  {status === 'scrub' && activeTab === 'scrub' && (
-                    <span style={{
-                      fontSize: '9px',
-                      fontWeight: '700',
-                      color: '#dc2626',
-                      background: darkMode ? 'rgba(220,38,38,0.2)' : '#fee2e2',
-                      padding: '2px 6px',
-                      borderRadius: '4px',
-                      textTransform: 'uppercase',
-                    }}>Scrub Likely</span>
-                  )}
-                  {status === 'scrub' && activeTab === 'volume' && (
-                    <span style={{
-                      fontSize: '9px',
-                      fontWeight: '700',
-                      color: '#dc2626',
-                      background: darkMode ? 'rgba(220,38,38,0.2)' : '#fee2e2',
-                      padding: '2px 6px',
-                      borderRadius: '4px',
-                      textTransform: 'uppercase',
-                    }}>Major Drop</span>
-                  )}
-                  {status === 'warning' && (
-                    <span style={{
-                      fontSize: '9px',
-                      fontWeight: '700',
-                      color: '#d97706',
-                      background: darkMode ? 'rgba(217,119,6,0.2)' : '#fef3c7',
-                      padding: '2px 6px',
-                      borderRadius: '4px',
-                      textTransform: 'uppercase',
-                    }}>Warning</span>
-                  )}
-                </div>
-                <div style={{ fontSize: '12px', color: theme.textSecondary }}>{row.publisher}</div>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: theme.text, marginBottom: '2px' }}>{row.campaign}</div>
+                <div style={{ fontSize: '11px', color: theme.textSecondary }}>{row.publisher}</div>
               </div>
-              <div style={{ flex: 1, textAlign: 'right', fontSize: '14px', fontWeight: '500', color: theme.textSecondary }}>
-                {activeTab === 'scrub' ? `${row.avgValue}%` : row.avgValue.toLocaleString()}
-              </div>
-              <div style={{ flex: 1, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
-                {activeTab === 'scrub' ? `${row.todayValue}%` : row.todayValue.toLocaleString()}
-              </div>
-              <div style={{ flex: 1, textAlign: 'right' }}>
+              <div style={{ flex: 0.8, textAlign: 'center' }}>
                 <span style={{
                   display: 'inline-block',
-                  padding: '4px 10px',
+                  fontSize: '10px',
+                  fontWeight: '700',
+                  color: colors.text,
+                  background: darkMode ? `${colors.text}22` : `${colors.text}11`,
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  textTransform: 'uppercase',
+                }}>
+                  {statusLabel}
+                </span>
+              </div>
+              <div style={{ flex: 0.7, textAlign: 'right', fontSize: '13px', fontWeight: '500', color: theme.textSecondary }}>
+                {row.baselineClicks?.toLocaleString() || 0}
+              </div>
+              <div style={{ flex: 0.7, textAlign: 'right', fontSize: '13px', fontWeight: '600', color: theme.text }}>
+                {row.todayClicks?.toLocaleString() || 0}
+              </div>
+              <div style={{ flex: 0.7, textAlign: 'right', fontSize: '13px', fontWeight: '500', color: theme.textSecondary }}>
+                {row.baselineConversions?.toLocaleString() || 0}
+              </div>
+              <div style={{ flex: 0.7, textAlign: 'right', fontSize: '13px', fontWeight: '600', color: theme.text }}>
+                {row.todayConversions?.toLocaleString() || 0}
+              </div>
+              <div style={{ flex: 0.7, textAlign: 'right', fontSize: '13px', fontWeight: '500', color: theme.textSecondary }}>
+                {activeTab === 'scrub' ? `${row.avgValue}%` : row.avgValue.toLocaleString()}
+              </div>
+              <div style={{ flex: 0.7, textAlign: 'right', fontSize: '13px', fontWeight: '600', color: theme.text }}>
+                {activeTab === 'scrub' ? `${row.todayValue}%` : row.todayValue.toLocaleString()}
+              </div>
+              <div style={{ flex: 0.7, textAlign: 'right' }}>
+                <span style={{
+                  display: 'inline-block',
+                  padding: '4px 8px',
                   background: status === 'healthy' ? (darkMode ? 'rgba(34,197,94,0.2)' : '#dcfce7') : 'transparent',
                   borderRadius: '6px',
-                  fontSize: '14px',
+                  fontSize: '13px',
                   fontWeight: '700',
                   color: colors.text,
                 }}>
