@@ -455,20 +455,15 @@ window.ScrubDetector = function ScrubDetector() {
       baseline.table.forEach(row => {
         // Use columns[0] for campaign (offer) and columns[2] for publisher (affiliate)
         // Note: Everflow returns 3 columns even though we only request 2: [offer, advertiser, affiliate]
-        const fullCampaign = row.columns[0]?.label || 'Unknown';
+        const campaign = row.columns[0]?.label || 'Unknown';
         const publisher = row.columns[2]?.label || 'Unknown';
-
-        // Extract base campaign name (first word to group campaign families)
-        // e.g., "Slotwise - First page" → "Slotwise", "Slotwise CPL - US Only" → "Slotwise"
-        const campaign = fullCampaign.split(/[\s-]/)[0];
-
         const key = `${campaign}-${publisher}`;
         const clicks = row.reporting?.total_click || 0;
         const convs = row.reporting?.cv || 0;
 
         // Debug logging for launch potato
         if (campaign.toLowerCase().includes('launch') || campaign.toLowerCase().includes('potato')) {
-          console.log('Baseline row:', { fullCampaign, campaign, publisher, clicks, convs, allColumns: row.columns });
+          console.log('Baseline row:', { campaign, publisher, clicks, convs, allColumns: row.columns });
         }
 
         if (baselineMap[key]) {
@@ -490,20 +485,15 @@ window.ScrubDetector = function ScrubDetector() {
       (today.table || []).forEach(row => {
         // Use columns[0] for campaign (offer) and columns[2] for publisher (affiliate)
         // Note: Everflow returns 3 columns even though we only request 2: [offer, advertiser, affiliate]
-        const fullCampaign = row.columns[0]?.label || 'Unknown';
+        const campaign = row.columns[0]?.label || 'Unknown';
         const publisher = row.columns[2]?.label || 'Unknown';
-
-        // Extract base campaign name (first word to group campaign families)
-        // e.g., "Slotwise - First page" → "Slotwise", "Slotwise CPL - US Only" → "Slotwise"
-        const campaign = fullCampaign.split(/[\s-]/)[0];
-
         const key = `${campaign}-${publisher}`;
         const clicks = row.reporting?.total_click || 0;
         const convs = row.reporting?.cv || 0;
 
-        // Debug logging for launch potato
-        if (campaign.toLowerCase().includes('launch') || campaign.toLowerCase().includes('potato') || campaign.toLowerCase().includes('slotwise')) {
-          console.log('Today row:', { fullCampaign, campaign, publisher, clicks, convs, key, allColumns: row.columns });
+        // Debug logging for slotwise
+        if (campaign.toLowerCase().includes('slotwise')) {
+          console.log('Today row:', { campaign, publisher, clicks, convs, key, allColumns: row.columns });
         }
 
         if (todayMap[key]) {
@@ -524,10 +514,10 @@ window.ScrubDetector = function ScrubDetector() {
       });
 
       console.log('Final todayMap:', todayMap);
-      // Log slotwise + launch potato final result
+      // Log all slotwise campaigns
       Object.keys(todayMap).forEach(key => {
-        if (key.toLowerCase().includes('slotwise') && key.toLowerCase().includes('launch')) {
-          console.log('FINAL Slotwise-Launch Potato:', key, todayMap[key]);
+        if (key.toLowerCase().includes('slotwise')) {
+          console.log('FINAL Slotwise campaign:', key, todayMap[key]);
         }
       });
 
