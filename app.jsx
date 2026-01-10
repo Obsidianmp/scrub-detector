@@ -1146,13 +1146,13 @@ window.ScrubDetector = function ScrubDetector() {
             Base CVR {sortBy === 'avgValue' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
           <div onClick={() => handleSort('todayClicks')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            Today Clicks {sortBy === 'todayClicks' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+            {includeYesterday ? 'Avg Clicks' : 'Today Clicks'} {sortBy === 'todayClicks' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
           <div onClick={() => handleSort('todayConversions')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            Today Convs {sortBy === 'todayConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+            {includeYesterday ? 'Avg Convs' : 'Today Convs'} {sortBy === 'todayConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
           <div onClick={() => handleSort('todayValue')} style={{ flex: 0.6, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            Today CVR {sortBy === 'todayValue' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+            {includeYesterday ? 'Avg CVR' : 'Today CVR'} {sortBy === 'todayValue' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
           <div onClick={() => handleSort('changePercent')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
             Change {sortBy === 'changePercent' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
