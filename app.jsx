@@ -494,6 +494,11 @@ window.ScrubDetector = function ScrubDetector() {
         const avgVol = base.clicks / (window - (excludeWeekends ? 2 : 0));
         const volChange = avgVol > 0 ? ((now.clicks - avgVol) / avgVol) * 100 : 0;
 
+        // Calculate baseline averages per day
+        const baselineDays = window - (excludeWeekends ? 2 : 0);
+        const avgBaselineClicks = Math.round(base.clicks / baselineDays);
+        const avgBaselineConversions = Math.round(base.conversions / baselineDays);
+
         // Calculate status priority for sorting (lower = worse)
         const cvrStatus = cvrChange >= 0 ? 3 : Math.abs(cvrChange) >= settings.scrubThreshold ? 0 : Math.abs(cvrChange) >= settings.warningThreshold ? 1 : 2;
         const volStatus = volChange >= 0 ? 3 : Math.abs(volChange) >= settings.volumeDropThreshold ? 0 : Math.abs(volChange) >= settings.volumeWarningThreshold ? 1 : 2;
@@ -505,9 +510,9 @@ window.ScrubDetector = function ScrubDetector() {
           avgValue: parseFloat(avgCvr.toFixed(2)),
           todayValue: parseFloat(now.cvr.toFixed(2)),
           changePercent: Math.round(cvrChange),
-          baselineClicks: base.clicks,
+          baselineClicks: avgBaselineClicks,
           todayClicks: now.clicks,
-          baselineConversions: base.conversions,
+          baselineConversions: avgBaselineConversions,
           todayConversions: now.conversions,
           status: cvrStatus
         });
@@ -519,9 +524,9 @@ window.ScrubDetector = function ScrubDetector() {
           avgValue: Math.round(avgVol),
           todayValue: now.clicks,
           changePercent: Math.round(volChange),
-          baselineClicks: base.clicks,
+          baselineClicks: avgBaselineClicks,
           todayClicks: now.clicks,
-          baselineConversions: base.conversions,
+          baselineConversions: avgBaselineConversions,
           todayConversions: now.conversions,
           status: volStatus
         });
