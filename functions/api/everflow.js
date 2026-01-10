@@ -19,8 +19,8 @@ export async function onRequest(context) {
     const body = await request.json();
 
     // Use different endpoints based on whether grouping is requested
-    const hasColumns = body.columns && body.columns.length > 0;
-    const endpoint = hasColumns
+    const hasGrouping = (body.columns && body.columns.length > 0) || (body.groups && body.groups.length > 0);
+    const endpoint = hasGrouping
       ? 'https://api.eflow.team/v1/networks/reporting/entity-stats'
       : 'https://api.eflow.team/v1/networks/reporting/entity/summary';
 

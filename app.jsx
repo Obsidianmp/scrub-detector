@@ -393,10 +393,7 @@ window.ScrubDetector = function ScrubDetector() {
           to: getDateStr(1),
           timezone_id: 67,
           currency_id: 'USD',
-          columns: [
-            { column: 'Offer' },
-            { column: 'Affiliate' }
-          ],
+          groups: ['Offer.name', 'Affiliate.company'],
           query: { filters: [] }
         })
       });
@@ -410,10 +407,7 @@ window.ScrubDetector = function ScrubDetector() {
           to: getDateStr(0),
           timezone_id: 67,
           currency_id: 'USD',
-          columns: [
-            { column: 'Offer' },
-            { column: 'Affiliate' }
-          ],
+          groups: ['Offer.name', 'Affiliate.company'],
           query: { filters: [] }
         })
       });
