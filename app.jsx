@@ -523,34 +523,6 @@ window.ScrubDetector = function ScrubDetector() {
     }
   };
 
-  const connectEverflow = async () => {
-    if (!apiKey.trim()) return;
-    setMode('loading');
-    
-    try {
-      const response = await fetch('/api/everflow', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          apiKey: apiKey,
-          endpoint: 'test'
-        })
-      });
-
-      if (response.ok) {
-        setMode('connected');
-        setCvrData(generateCvrData());
-        setVolumeData(generateVolumeData());
-        setCapsData(generateCapsData());
-      } else {
-        alert('Failed to connect. Check your API key.');
-        setMode('landing');
-      }
-    } catch (error) {
-      alert('Connection error: ' + error.message);
-      setMode('landing');
-    }
-  };
 
   const loadDemoData = () => {
     setMode('demo');
