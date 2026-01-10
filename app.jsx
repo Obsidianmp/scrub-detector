@@ -1136,6 +1136,9 @@ window.ScrubDetector = function ScrubDetector() {
           <div onClick={() => handleSort('status')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
             Status {sortBy === 'status' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
+          <div onClick={() => handleSort('baselineClicks')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+            Base Clicks {sortBy === 'baselineClicks' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+          </div>
           <div onClick={() => handleSort('baselineConversions')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
             Base Convs {sortBy === 'baselineConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
@@ -1198,6 +1201,14 @@ window.ScrubDetector = function ScrubDetector() {
                 }}>
                   {statusConfig[status].label}
                 </span>
+              </div>
+              <div style={{ flex: 0.7, textAlign: 'right' }}>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>
+                  {row.baselineClicks?.toLocaleString() || 0}
+                </div>
+                <div style={{ fontSize: '10px', color: theme.textMuted, marginTop: '2px' }}>
+                  (avg/day)
+                </div>
               </div>
               <div style={{ flex: 0.7, textAlign: 'right' }}>
                 <div style={{ fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>
