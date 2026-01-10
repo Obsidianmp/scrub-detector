@@ -517,6 +517,7 @@ window.ScrubDetector = function ScrubDetector() {
           todayClicks: now.clicks,
           baselineConversions: Math.round(avgBaselineConversions),
           todayConversions: now.conversions,
+          baselineTotalConversions: base.conversions, // Total conversions over baseline period
           status: cvrStatus
         });
 
@@ -531,6 +532,7 @@ window.ScrubDetector = function ScrubDetector() {
           todayClicks: now.clicks,
           baselineConversions: Math.round(avgBaselineConversions),
           todayConversions: now.conversions,
+          baselineTotalConversions: base.conversions, // Total conversions over baseline period
           status: volStatus
         });
       });
@@ -1071,19 +1073,22 @@ window.ScrubDetector = function ScrubDetector() {
       <div style={{ padding: '16px 20px 12px', background: theme.bg }}>
         <div style={{ display: 'flex', gap: '12px', padding: '12px 16px', background: theme.bgSecondary, borderRadius: '10px 10px 0 0', border: `1px solid ${theme.border}`, borderBottom: 'none' }}>
           <div style={{ flex: 2.5, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Campaign / Publisher</div>
-          <div onClick={() => handleSort('status')} style={{ flex: 0.8, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+          <div onClick={() => handleSort('status')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
             Status {sortBy === 'status' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
-          <div onClick={() => handleSort('todayClicks')} style={{ flex: 0.8, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            Clicks (Today) {sortBy === 'todayClicks' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+          <div onClick={() => handleSort('baselineTotalConversions')} style={{ flex: 0.8, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+            Baseline Convs {sortBy === 'baselineTotalConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
-          <div onClick={() => handleSort('todayConversions')} style={{ flex: 0.8, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            Conversions {sortBy === 'todayConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+          <div onClick={() => handleSort('todayClicks')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+            Clicks {sortBy === 'todayClicks' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
-          <div onClick={() => handleSort('todayValue')} style={{ flex: 0.8, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            CVR (Today) {sortBy === 'todayValue' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+          <div onClick={() => handleSort('todayConversions')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+            Convs {sortBy === 'todayConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
-          <div onClick={() => handleSort('changePercent')} style={{ flex: 0.8, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+          <div onClick={() => handleSort('todayValue')} style={{ flex: 0.6, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+            CVR {sortBy === 'todayValue' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+          </div>
+          <div onClick={() => handleSort('changePercent')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
             Change {sortBy === 'changePercent' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
           </div>
         </div>
@@ -1115,7 +1120,7 @@ window.ScrubDetector = function ScrubDetector() {
                 <div style={{ fontSize: '14px', fontWeight: '600', color: theme.text, marginBottom: '4px' }}>{row.campaign}</div>
                 <div style={{ fontSize: '12px', color: theme.textSecondary }}>{row.publisher}</div>
               </div>
-              <div style={{ flex: 0.8, textAlign: 'center' }}>
+              <div style={{ flex: 0.7, textAlign: 'center' }}>
                 <span style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -1131,16 +1136,24 @@ window.ScrubDetector = function ScrubDetector() {
                   {statusConfig[status].label}
                 </span>
               </div>
-              <div style={{ flex: 0.8, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
+              <div style={{ flex: 0.8, textAlign: 'right' }}>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>
+                  {row.baselineTotalConversions?.toLocaleString() || 0}
+                </div>
+                <div style={{ fontSize: '10px', color: theme.textMuted, marginTop: '2px' }}>
+                  ({window} days)
+                </div>
+              </div>
+              <div style={{ flex: 0.7, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
                 {row.todayClicks?.toLocaleString() || 0}
               </div>
-              <div style={{ flex: 0.8, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
+              <div style={{ flex: 0.7, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
                 {row.todayConversions?.toLocaleString() || 0}
               </div>
-              <div style={{ flex: 0.8, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
+              <div style={{ flex: 0.6, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
                 {activeTab === 'scrub' ? `${row.todayValue}%` : row.todayValue.toLocaleString()}
               </div>
-              <div style={{ flex: 0.8, textAlign: 'right' }}>
+              <div style={{ flex: 0.7, textAlign: 'right' }}>
                 <span style={{
                   display: 'inline-block',
                   padding: '6px 12px',
