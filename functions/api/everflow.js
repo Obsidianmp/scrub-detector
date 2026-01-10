@@ -35,6 +35,10 @@ export async function onRequest(context) {
 
     const data = await response.json();
 
+    // Log the request and response for debugging
+    console.log('Everflow API request:', { endpoint, body });
+    console.log('Everflow API response:', data);
+
     return new Response(JSON.stringify(data), {
       headers: {
         'Content-Type': 'application/json',
