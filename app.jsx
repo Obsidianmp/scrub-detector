@@ -421,6 +421,8 @@ window.ScrubDetector = function ScrubDetector() {
       if (baselineRes.ok && todayRes.ok) {
         const baseline = await baselineRes.json();
         const today = await todayRes.json();
+        console.log('Baseline response:', baseline);
+        console.log('Today response:', today);
         processEverflowData(baseline, today);
       }
     } catch (e) {
