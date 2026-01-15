@@ -301,6 +301,12 @@ window.ScrubDetector = function ScrubDetector() {
   const [window, setWindow] = useState(10);
   const [includeYesterday, setIncludeYesterday] = useState(false);
   const [excludeWeekends, setExcludeWeekends] = useState(true);
+  const [useCustomBaseline, setUseCustomBaseline] = useState(false);
+  const [customBaselineStart, setCustomBaselineStart] = useState('');
+  const [customBaselineEnd, setCustomBaselineEnd] = useState('');
+  const [useCustomCurrent, setUseCustomCurrent] = useState(false);
+  const [customCurrentStart, setCustomCurrentStart] = useState('');
+  const [customCurrentEnd, setCustomCurrentEnd] = useState('');
   const [sortBy, setSortBy] = useState('todayClicks');
   const [sortAsc, setSortAsc] = useState(false);
   const [apiKey, setApiKey] = useState('');
@@ -323,7 +329,7 @@ window.ScrubDetector = function ScrubDetector() {
     if (mode === 'live' && !loading) {
       fetchLiveData();
     }
-  }, [window, includeYesterday, excludeWeekends]);
+  }, [window, includeYesterday, excludeWeekends, useCustomBaseline, customBaselineStart, customBaselineEnd, useCustomCurrent, customCurrentStart, customCurrentEnd]);
 
   const theme = darkMode ? {
     bg: '#0f172a',
@@ -395,13 +401,21 @@ window.ScrubDetector = function ScrubDetector() {
   const fetchLiveData = async () => {
     setLoading(true);
     try {
+      // Determine baseline date range
+      const baselineFrom = useCustomBaseline && customBaselineStart ? customBaselineStart : getDateStr(window);
+      const baselineTo = useCustomBaseline && customBaselineEnd ? customBaselineEnd : getDateStr(1);
+
+      // Determine current period date range
+      const currentFrom = useCustomCurrent && customCurrentStart ? customCurrentStart : (includeYesterday ? getDateStr(1) : getDateStr(0));
+      const currentTo = useCustomCurrent && customCurrentEnd ? customCurrentEnd : getDateStr(0);
+
       // Fetch baseline data (past X days)
       const baselineRes = await fetch('/api/everflow', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from: getDateStr(window),
-          to: getDateStr(1),
+          from: baselineFrom,
+          to: baselineTo,
           timezone_id: 80, // America/New_York (EST/EDT)
           currency_id: 'USD',
           columns: [
@@ -417,8 +431,8 @@ window.ScrubDetector = function ScrubDetector() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from: includeYesterday ? getDateStr(1) : getDateStr(0),
-          to: getDateStr(0),
+          from: currentFrom,
+          to: currentTo,
           timezone_id: 80, // America/New_York (EST/EDT)
           currency_id: 'USD',
           columns: [
@@ -1069,42 +1083,104 @@ window.ScrubDetector = function ScrubDetector() {
       {/* Controls */}
       <div style={{ padding: '20px', background: theme.bg }}>
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1 1 300px', background: theme.bgSecondary, padding: '16px', borderRadius: '12px', border: `1px solid ${theme.border}` }}>
+          <div style={{ flex: '1 1 350px', background: theme.bgSecondary, padding: '16px', borderRadius: '12px', border: `1px solid ${theme.border}` }}>
             <label style={{ fontSize: '11px', fontWeight: '600', color: theme.textSecondary, display: 'block', marginBottom: '10px', textTransform: 'uppercase' }}>
               Baseline Period
             </label>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: useCustomBaseline ? '12px' : '0' }}>
               {[5, 10, 30].map((days) => (
-                <button key={days} onClick={() => setWindow(days)} style={{
-                  flex: 1, padding: '10px', background: window === days ? '#3b82f6' : 'transparent',
-                  border: `2px solid ${window === days ? '#3b82f6' : theme.border}`, borderRadius: '8px',
-                  color: window === days ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                <button key={days} onClick={() => { setWindow(days); setUseCustomBaseline(false); }} style={{
+                  flex: 1, padding: '10px', background: !useCustomBaseline && window === days ? '#3b82f6' : 'transparent',
+                  border: `2px solid ${!useCustomBaseline && window === days ? '#3b82f6' : theme.border}`, borderRadius: '8px',
+                  color: !useCustomBaseline && window === days ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
                   transition: 'all 0.2s',
                 }}>
-                  {days} Days
+                  {days}d
                 </button>
               ))}
+              <button onClick={() => setUseCustomBaseline(!useCustomBaseline)} style={{
+                flex: 1, padding: '10px', background: useCustomBaseline ? '#8b5cf6' : 'transparent',
+                border: `2px solid ${useCustomBaseline ? '#8b5cf6' : theme.border}`, borderRadius: '8px',
+                color: useCustomBaseline ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}>
+                Custom
+              </button>
             </div>
+            {useCustomBaseline && (
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input
+                  type="date"
+                  value={customBaselineStart}
+                  onChange={(e) => setCustomBaselineStart(e.target.value)}
+                  style={{
+                    flex: 1, padding: '8px 10px', background: theme.bgTertiary, border: `1px solid ${theme.border}`,
+                    borderRadius: '6px', color: theme.text, fontSize: '13px',
+                  }}
+                />
+                <span style={{ color: theme.textSecondary, fontSize: '12px' }}>to</span>
+                <input
+                  type="date"
+                  value={customBaselineEnd}
+                  onChange={(e) => setCustomBaselineEnd(e.target.value)}
+                  style={{
+                    flex: 1, padding: '8px 10px', background: theme.bgTertiary, border: `1px solid ${theme.border}`,
+                    borderRadius: '6px', color: theme.text, fontSize: '13px',
+                  }}
+                />
+              </div>
+            )}
           </div>
 
-          <div style={{ flex: '1 1 300px', background: theme.bgSecondary, padding: '16px', borderRadius: '12px', border: `1px solid ${theme.border}` }}>
+          <div style={{ flex: '1 1 350px', background: theme.bgSecondary, padding: '16px', borderRadius: '12px', border: `1px solid ${theme.border}` }}>
             <label style={{ fontSize: '11px', fontWeight: '600', color: theme.textSecondary, display: 'block', marginBottom: '10px', textTransform: 'uppercase' }}>
               Current Period
             </label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button onClick={() => setIncludeYesterday(false)} style={{
-                flex: 1, padding: '10px', background: !includeYesterday ? '#3b82f6' : 'transparent',
-                border: `2px solid ${!includeYesterday ? '#3b82f6' : theme.border}`, borderRadius: '8px',
-                color: !includeYesterday ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+            <div style={{ display: 'flex', gap: '8px', marginBottom: useCustomCurrent ? '12px' : '0' }}>
+              <button onClick={() => { setIncludeYesterday(false); setUseCustomCurrent(false); }} style={{
+                flex: 1, padding: '10px', background: !useCustomCurrent && !includeYesterday ? '#3b82f6' : 'transparent',
+                border: `2px solid ${!useCustomCurrent && !includeYesterday ? '#3b82f6' : theme.border}`, borderRadius: '8px',
+                color: !useCustomCurrent && !includeYesterday ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
                 transition: 'all 0.2s',
-              }}>Today Only</button>
-              <button onClick={() => setIncludeYesterday(true)} style={{
-                flex: 1, padding: '10px', background: includeYesterday ? '#3b82f6' : 'transparent',
-                border: `2px solid ${includeYesterday ? '#3b82f6' : theme.border}`, borderRadius: '8px',
-                color: includeYesterday ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+              }}>Today</button>
+              <button onClick={() => { setIncludeYesterday(true); setUseCustomCurrent(false); }} style={{
+                flex: 1, padding: '10px', background: !useCustomCurrent && includeYesterday ? '#3b82f6' : 'transparent',
+                border: `2px solid ${!useCustomCurrent && includeYesterday ? '#3b82f6' : theme.border}`, borderRadius: '8px',
+                color: !useCustomCurrent && includeYesterday ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
                 transition: 'all 0.2s',
-              }}>Last 2 Days</button>
+              }}>2 Days</button>
+              <button onClick={() => setUseCustomCurrent(!useCustomCurrent)} style={{
+                flex: 1, padding: '10px', background: useCustomCurrent ? '#8b5cf6' : 'transparent',
+                border: `2px solid ${useCustomCurrent ? '#8b5cf6' : theme.border}`, borderRadius: '8px',
+                color: useCustomCurrent ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}>
+                Custom
+              </button>
             </div>
+            {useCustomCurrent && (
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input
+                  type="date"
+                  value={customCurrentStart}
+                  onChange={(e) => setCustomCurrentStart(e.target.value)}
+                  style={{
+                    flex: 1, padding: '8px 10px', background: theme.bgTertiary, border: `1px solid ${theme.border}`,
+                    borderRadius: '6px', color: theme.text, fontSize: '13px',
+                  }}
+                />
+                <span style={{ color: theme.textSecondary, fontSize: '12px' }}>to</span>
+                <input
+                  type="date"
+                  value={customCurrentEnd}
+                  onChange={(e) => setCustomCurrentEnd(e.target.value)}
+                  style={{
+                    flex: 1, padding: '8px 10px', background: theme.bgTertiary, border: `1px solid ${theme.border}`,
+                    borderRadius: '6px', color: theme.text, fontSize: '13px',
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           <div style={{ flex: '0 1 auto', background: theme.bgSecondary, padding: '16px', borderRadius: '12px', border: `1px solid ${theme.border}` }}>
