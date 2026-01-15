@@ -294,6 +294,14 @@ const generateCapsData = () => [
 window.ScrubDetector = function ScrubDetector() {
   const [mode, setMode] = useState('landing');
   const [activeTab, setActiveTab] = useState('scrub'); // 'scrub', 'volume', or 'caps'
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Detect mobile screen size
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const [cvrData, setCvrData] = useState([]);
   const [volumeData, setVolumeData] = useState([]);
   const [capsData, setCapsData] = useState([]);
@@ -851,7 +859,7 @@ window.ScrubDetector = function ScrubDetector() {
     }}>
       {/* Header */}
       <header style={{
-        padding: '12px 20px',
+        padding: isMobile ? '10px 12px' : '12px 20px',
         background: theme.bgSecondary,
         borderBottom: `1px solid ${theme.border}`,
         display: 'flex',
@@ -861,7 +869,7 @@ window.ScrubDetector = function ScrubDetector() {
         top: 0,
         zIndex: 100,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '6px' : '8px' }}>
           {/* Tab: Scrub Detector */}
           <button
             onClick={() => setActiveTab('scrub')}
@@ -869,7 +877,7 @@ window.ScrubDetector = function ScrubDetector() {
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '8px 12px',
+              padding: isMobile ? '8px' : '8px 12px',
               background: activeTab === 'scrub' ? '#3b82f6' : 'transparent',
               border: activeTab === 'scrub' ? 'none' : `1px solid ${theme.border}`,
               borderRadius: '10px',
@@ -879,8 +887,8 @@ window.ScrubDetector = function ScrubDetector() {
             }}
           >
             <div style={{
-              width: '28px',
-              height: '28px',
+              width: isMobile ? '32px' : '28px',
+              height: isMobile ? '32px' : '28px',
               background: activeTab === 'scrub' ? 'rgba(255,255,255,0.2)' : 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
               borderRadius: '8px',
               display: 'flex',
@@ -891,7 +899,7 @@ window.ScrubDetector = function ScrubDetector() {
                 <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4"/>
               </svg>
             </div>
-            <span style={{ fontSize: '14px', fontWeight: '600' }}>Scrub Detector</span>
+            {!isMobile && <span style={{ fontSize: '14px', fontWeight: '600' }}>Scrub Detector</span>}
           </button>
 
           {/* Tab: Volume Watcher */}
@@ -901,7 +909,7 @@ window.ScrubDetector = function ScrubDetector() {
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '8px 12px',
+              padding: isMobile ? '8px' : '8px 12px',
               background: activeTab === 'volume' ? '#8b5cf6' : 'transparent',
               border: activeTab === 'volume' ? 'none' : `1px solid ${theme.border}`,
               borderRadius: '10px',
@@ -911,8 +919,8 @@ window.ScrubDetector = function ScrubDetector() {
             }}
           >
             <div style={{
-              width: '28px',
-              height: '28px',
+              width: isMobile ? '32px' : '28px',
+              height: isMobile ? '32px' : '28px',
               background: activeTab === 'volume' ? 'rgba(255,255,255,0.2)' : 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
               borderRadius: '8px',
               display: 'flex',
@@ -926,7 +934,7 @@ window.ScrubDetector = function ScrubDetector() {
                 <circle cx="19" cy="5" r="1" fill="white"/>
               </svg>
             </div>
-            <span style={{ fontSize: '14px', fontWeight: '600' }}>Volume Watcher</span>
+            {!isMobile && <span style={{ fontSize: '14px', fontWeight: '600' }}>Volume Watcher</span>}
           </button>
 
           {/* Tab: Cap Radar */}
@@ -936,7 +944,7 @@ window.ScrubDetector = function ScrubDetector() {
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              padding: '8px 12px',
+              padding: isMobile ? '8px' : '8px 12px',
               background: activeTab === 'caps' ? '#10b981' : 'transparent',
               border: activeTab === 'caps' ? 'none' : `1px solid ${theme.border}`,
               borderRadius: '10px',
@@ -946,8 +954,8 @@ window.ScrubDetector = function ScrubDetector() {
             }}
           >
             <div style={{
-              width: '28px',
-              height: '28px',
+              width: isMobile ? '32px' : '28px',
+              height: isMobile ? '32px' : '28px',
               background: activeTab === 'caps' ? 'rgba(255,255,255,0.2)' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
               borderRadius: '8px',
               display: 'flex',
@@ -964,7 +972,7 @@ window.ScrubDetector = function ScrubDetector() {
                 <line x1="20" y1="12" x2="22" y2="12"/>
               </svg>
             </div>
-            <span style={{ fontSize: '14px', fontWeight: '600' }}>Cap Radar</span>
+            {!isMobile && <span style={{ fontSize: '14px', fontWeight: '600' }}>Cap Radar</span>}
           </button>
         </div>
 
@@ -1050,81 +1058,81 @@ window.ScrubDetector = function ScrubDetector() {
       {(activeTab === 'scrub' || activeTab === 'volume') && (
         <>
       {/* Summary Cards */}
-      <div style={{ padding: '20px', display: 'flex', gap: '12px', background: theme.bg }}>
-        <div style={{ flex: 1, padding: '16px 20px', background: theme.bgSecondary, border: `2px solid ${scrubCount > 0 ? '#dc2626' : theme.border}`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ padding: isMobile ? '12px' : '20px', display: 'flex', gap: isMobile ? '8px' : '12px', background: theme.bg, flexWrap: 'wrap' }}>
+        <div style={{ flex: isMobile ? '1 1 calc(50% - 4px)' : 1, padding: isMobile ? '12px' : '16px 20px', background: theme.bgSecondary, border: `2px solid ${scrubCount > 0 ? '#dc2626' : theme.border}`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontSize: '11px', color: theme.textSecondary, fontWeight: '600', textTransform: 'uppercase', marginBottom: '4px' }}>{activeTab === 'scrub' ? 'Scrub Likely' : 'Major Drop'}</div>
-            <div style={{ fontSize: '28px', fontWeight: '700', color: '#dc2626' }}>{scrubCount}</div>
+            <div style={{ fontSize: isMobile ? '10px' : '11px', color: theme.textSecondary, fontWeight: '600', textTransform: 'uppercase', marginBottom: '4px' }}>{activeTab === 'scrub' ? 'Scrub' : 'Drop'}</div>
+            <div style={{ fontSize: isMobile ? '24px' : '28px', fontWeight: '700', color: '#dc2626' }}>{scrubCount}</div>
           </div>
-          <div style={{ width: '48px', height: '48px', background: 'rgba(220,38,38,0.15)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '24px' }}>🚨</span>
+          <div style={{ width: isMobile ? '36px' : '48px', height: isMobile ? '36px' : '48px', background: 'rgba(220,38,38,0.15)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: isMobile ? '18px' : '24px' }}>🚨</span>
           </div>
         </div>
-        <div style={{ flex: 1, padding: '16px 20px', background: theme.bgSecondary, border: `2px solid ${warningCount > 0 ? '#d97706' : theme.border}`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ flex: isMobile ? '1 1 calc(50% - 4px)' : 1, padding: isMobile ? '12px' : '16px 20px', background: theme.bgSecondary, border: `2px solid ${warningCount > 0 ? '#d97706' : theme.border}`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontSize: '11px', color: theme.textSecondary, fontWeight: '600', textTransform: 'uppercase', marginBottom: '4px' }}>Warning</div>
-            <div style={{ fontSize: '28px', fontWeight: '700', color: '#d97706' }}>{warningCount}</div>
+            <div style={{ fontSize: isMobile ? '10px' : '11px', color: theme.textSecondary, fontWeight: '600', textTransform: 'uppercase', marginBottom: '4px' }}>Warning</div>
+            <div style={{ fontSize: isMobile ? '24px' : '28px', fontWeight: '700', color: '#d97706' }}>{warningCount}</div>
           </div>
-          <div style={{ width: '48px', height: '48px', background: 'rgba(217,119,6,0.15)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '24px' }}>⚠️</span>
+          <div style={{ width: isMobile ? '36px' : '48px', height: isMobile ? '36px' : '48px', background: 'rgba(217,119,6,0.15)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: isMobile ? '18px' : '24px' }}>⚠️</span>
           </div>
         </div>
-        <div style={{ flex: 1, padding: '16px 20px', background: theme.bgSecondary, border: `2px solid ${theme.border}`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ flex: isMobile ? '1 1 100%' : 1, padding: isMobile ? '12px' : '16px 20px', background: theme.bgSecondary, border: `2px solid ${theme.border}`, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontSize: '11px', color: theme.textSecondary, fontWeight: '600', textTransform: 'uppercase', marginBottom: '4px' }}>Healthy</div>
-            <div style={{ fontSize: '28px', fontWeight: '700', color: '#16a34a' }}>{healthyCount}</div>
+            <div style={{ fontSize: isMobile ? '10px' : '11px', color: theme.textSecondary, fontWeight: '600', textTransform: 'uppercase', marginBottom: '4px' }}>Healthy</div>
+            <div style={{ fontSize: isMobile ? '24px' : '28px', fontWeight: '700', color: '#16a34a' }}>{healthyCount}</div>
           </div>
-          <div style={{ width: '48px', height: '48px', background: 'rgba(34,197,94,0.15)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '24px' }}>✅</span>
+          <div style={{ width: isMobile ? '36px' : '48px', height: isMobile ? '36px' : '48px', background: 'rgba(34,197,94,0.15)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: isMobile ? '18px' : '24px' }}>✅</span>
           </div>
         </div>
       </div>
 
       {/* Controls */}
-      <div style={{ padding: '20px', background: theme.bg }}>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <div style={{ flex: '1 1 350px', background: theme.bgSecondary, padding: '16px', borderRadius: '12px', border: `1px solid ${theme.border}` }}>
+      <div style={{ padding: isMobile ? '12px' : '20px', background: theme.bg }}>
+        <div style={{ display: 'flex', gap: isMobile ? '8px' : '12px', flexWrap: 'wrap' }}>
+          <div style={{ flex: isMobile ? '1 1 100%' : '1 1 350px', background: theme.bgSecondary, padding: isMobile ? '12px' : '16px', borderRadius: '12px', border: `1px solid ${theme.border}` }}>
             <label style={{ fontSize: '11px', fontWeight: '600', color: theme.textSecondary, display: 'block', marginBottom: '10px', textTransform: 'uppercase' }}>
               Baseline Period
             </label>
-            <div style={{ display: 'flex', gap: '8px', marginBottom: useCustomBaseline ? '12px' : '0' }}>
+            <div style={{ display: 'flex', gap: isMobile ? '6px' : '8px', marginBottom: useCustomBaseline ? '12px' : '0' }}>
               {[5, 10, 30].map((days) => (
                 <button key={days} onClick={() => { setWindow(days); setUseCustomBaseline(false); }} style={{
-                  flex: 1, padding: '10px', background: !useCustomBaseline && window === days ? '#3b82f6' : 'transparent',
+                  flex: 1, padding: isMobile ? '8px 4px' : '10px', background: !useCustomBaseline && window === days ? '#3b82f6' : 'transparent',
                   border: `2px solid ${!useCustomBaseline && window === days ? '#3b82f6' : theme.border}`, borderRadius: '8px',
-                  color: !useCustomBaseline && window === days ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                  color: !useCustomBaseline && window === days ? '#fff' : theme.text, fontSize: isMobile ? '12px' : '13px', fontWeight: '600', cursor: 'pointer',
                   transition: 'all 0.2s',
                 }}>
                   {days}d
                 </button>
               ))}
               <button onClick={() => setUseCustomBaseline(!useCustomBaseline)} style={{
-                flex: 1, padding: '10px', background: useCustomBaseline ? '#8b5cf6' : 'transparent',
+                flex: 1, padding: isMobile ? '8px 4px' : '10px', background: useCustomBaseline ? '#8b5cf6' : 'transparent',
                 border: `2px solid ${useCustomBaseline ? '#8b5cf6' : theme.border}`, borderRadius: '8px',
-                color: useCustomBaseline ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                color: useCustomBaseline ? '#fff' : theme.text, fontSize: isMobile ? '12px' : '13px', fontWeight: '600', cursor: 'pointer',
                 transition: 'all 0.2s',
               }}>
-                Custom
+                {isMobile ? '...' : 'Custom'}
               </button>
             </div>
             {useCustomBaseline && (
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
                 <input
                   type="date"
                   value={customBaselineStart}
                   onChange={(e) => setCustomBaselineStart(e.target.value)}
                   style={{
-                    flex: 1, padding: '8px 10px', background: theme.bgTertiary, border: `1px solid ${theme.border}`,
+                    flex: isMobile ? '1 1 100%' : 1, padding: '8px 10px', background: theme.bgTertiary, border: `1px solid ${theme.border}`,
                     borderRadius: '6px', color: theme.text, fontSize: '13px',
                   }}
                 />
-                <span style={{ color: theme.textSecondary, fontSize: '12px' }}>to</span>
+                {!isMobile && <span style={{ color: theme.textSecondary, fontSize: '12px' }}>to</span>}
                 <input
                   type="date"
                   value={customBaselineEnd}
                   onChange={(e) => setCustomBaselineEnd(e.target.value)}
                   style={{
-                    flex: 1, padding: '8px 10px', background: theme.bgTertiary, border: `1px solid ${theme.border}`,
+                    flex: isMobile ? '1 1 100%' : 1, padding: '8px 10px', background: theme.bgTertiary, border: `1px solid ${theme.border}`,
                     borderRadius: '6px', color: theme.text, fontSize: '13px',
                   }}
                 />
@@ -1132,50 +1140,50 @@ window.ScrubDetector = function ScrubDetector() {
             )}
           </div>
 
-          <div style={{ flex: '1 1 350px', background: theme.bgSecondary, padding: '16px', borderRadius: '12px', border: `1px solid ${theme.border}` }}>
+          <div style={{ flex: isMobile ? '1 1 100%' : '1 1 350px', background: theme.bgSecondary, padding: isMobile ? '12px' : '16px', borderRadius: '12px', border: `1px solid ${theme.border}` }}>
             <label style={{ fontSize: '11px', fontWeight: '600', color: theme.textSecondary, display: 'block', marginBottom: '10px', textTransform: 'uppercase' }}>
               Current Period
             </label>
-            <div style={{ display: 'flex', gap: '8px', marginBottom: useCustomCurrent ? '12px' : '0' }}>
+            <div style={{ display: 'flex', gap: isMobile ? '6px' : '8px', marginBottom: useCustomCurrent ? '12px' : '0' }}>
               <button onClick={() => { setIncludeYesterday(false); setUseCustomCurrent(false); }} style={{
-                flex: 1, padding: '10px', background: !useCustomCurrent && !includeYesterday ? '#3b82f6' : 'transparent',
+                flex: 1, padding: isMobile ? '8px 4px' : '10px', background: !useCustomCurrent && !includeYesterday ? '#3b82f6' : 'transparent',
                 border: `2px solid ${!useCustomCurrent && !includeYesterday ? '#3b82f6' : theme.border}`, borderRadius: '8px',
-                color: !useCustomCurrent && !includeYesterday ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                color: !useCustomCurrent && !includeYesterday ? '#fff' : theme.text, fontSize: isMobile ? '12px' : '13px', fontWeight: '600', cursor: 'pointer',
                 transition: 'all 0.2s',
               }}>Today</button>
               <button onClick={() => { setIncludeYesterday(true); setUseCustomCurrent(false); }} style={{
-                flex: 1, padding: '10px', background: !useCustomCurrent && includeYesterday ? '#3b82f6' : 'transparent',
+                flex: 1, padding: isMobile ? '8px 4px' : '10px', background: !useCustomCurrent && includeYesterday ? '#3b82f6' : 'transparent',
                 border: `2px solid ${!useCustomCurrent && includeYesterday ? '#3b82f6' : theme.border}`, borderRadius: '8px',
-                color: !useCustomCurrent && includeYesterday ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                color: !useCustomCurrent && includeYesterday ? '#fff' : theme.text, fontSize: isMobile ? '12px' : '13px', fontWeight: '600', cursor: 'pointer',
                 transition: 'all 0.2s',
-              }}>2 Days</button>
+              }}>2d</button>
               <button onClick={() => setUseCustomCurrent(!useCustomCurrent)} style={{
-                flex: 1, padding: '10px', background: useCustomCurrent ? '#8b5cf6' : 'transparent',
+                flex: 1, padding: isMobile ? '8px 4px' : '10px', background: useCustomCurrent ? '#8b5cf6' : 'transparent',
                 border: `2px solid ${useCustomCurrent ? '#8b5cf6' : theme.border}`, borderRadius: '8px',
-                color: useCustomCurrent ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
+                color: useCustomCurrent ? '#fff' : theme.text, fontSize: isMobile ? '12px' : '13px', fontWeight: '600', cursor: 'pointer',
                 transition: 'all 0.2s',
               }}>
-                Custom
+                {isMobile ? '...' : 'Custom'}
               </button>
             </div>
             {useCustomCurrent && (
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
                 <input
                   type="date"
                   value={customCurrentStart}
                   onChange={(e) => setCustomCurrentStart(e.target.value)}
                   style={{
-                    flex: 1, padding: '8px 10px', background: theme.bgTertiary, border: `1px solid ${theme.border}`,
+                    flex: isMobile ? '1 1 100%' : 1, padding: '8px 10px', background: theme.bgTertiary, border: `1px solid ${theme.border}`,
                     borderRadius: '6px', color: theme.text, fontSize: '13px',
                   }}
                 />
-                <span style={{ color: theme.textSecondary, fontSize: '12px' }}>to</span>
+                {!isMobile && <span style={{ color: theme.textSecondary, fontSize: '12px' }}>to</span>}
                 <input
                   type="date"
                   value={customCurrentEnd}
                   onChange={(e) => setCustomCurrentEnd(e.target.value)}
                   style={{
-                    flex: 1, padding: '8px 10px', background: theme.bgTertiary, border: `1px solid ${theme.border}`,
+                    flex: isMobile ? '1 1 100%' : 1, padding: '8px 10px', background: theme.bgTertiary, border: `1px solid ${theme.border}`,
                     borderRadius: '6px', color: theme.text, fontSize: '13px',
                   }}
                 />
@@ -1183,19 +1191,19 @@ window.ScrubDetector = function ScrubDetector() {
             )}
           </div>
 
-          <div style={{ flex: '0 1 auto', background: theme.bgSecondary, padding: '16px', borderRadius: '12px', border: `1px solid ${theme.border}` }}>
+          <div style={{ flex: isMobile ? '1 1 100%' : '0 1 auto', background: theme.bgSecondary, padding: isMobile ? '12px' : '16px', borderRadius: '12px', border: `1px solid ${theme.border}` }}>
             <label style={{ fontSize: '11px', fontWeight: '600', color: theme.textSecondary, display: 'block', marginBottom: '10px', textTransform: 'uppercase' }}>
               Include Weekends
             </label>
             <div style={{ display: 'flex', gap: '8px' }}>
               <button onClick={() => setExcludeWeekends(false)} style={{
-                padding: '10px 16px', background: !excludeWeekends ? '#16a34a' : 'transparent',
+                flex: isMobile ? 1 : 'none', padding: isMobile ? '8px' : '10px 16px', background: !excludeWeekends ? '#16a34a' : 'transparent',
                 border: `2px solid ${!excludeWeekends ? '#16a34a' : theme.border}`, borderRadius: '8px',
                 color: !excludeWeekends ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
                 transition: 'all 0.2s',
               }}>Yes</button>
               <button onClick={() => setExcludeWeekends(true)} style={{
-                padding: '10px 16px', background: excludeWeekends ? '#ef4444' : 'transparent',
+                flex: isMobile ? 1 : 'none', padding: isMobile ? '8px' : '10px 16px', background: excludeWeekends ? '#ef4444' : 'transparent',
                 border: `2px solid ${excludeWeekends ? '#ef4444' : theme.border}`, borderRadius: '8px',
                 color: excludeWeekends ? '#fff' : theme.text, fontSize: '13px', fontWeight: '600', cursor: 'pointer',
                 transition: 'all 0.2s',
@@ -1205,125 +1213,208 @@ window.ScrubDetector = function ScrubDetector() {
         </div>
       </div>
 
-      {/* Table Header */}
-      <div style={{ padding: '16px 20px 12px', background: theme.bg }}>
-        <div style={{ display: 'flex', gap: '12px', padding: '12px 16px', background: theme.bgSecondary, borderRadius: '10px 10px 0 0', border: `1px solid ${theme.border}`, borderBottom: 'none' }}>
-          <div style={{ flex: 2.5, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Campaign / Publisher</div>
-          <div onClick={() => handleSort('status')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-            Status {sortBy === 'status' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
-          </div>
-          <div onClick={() => handleSort('baselineClicks')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            Base Clicks {sortBy === 'baselineClicks' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
-          </div>
-          <div onClick={() => handleSort('baselineConversions')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            Base Convs {sortBy === 'baselineConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
-          </div>
-          <div onClick={() => handleSort('avgValue')} style={{ flex: 0.6, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            Base CVR {sortBy === 'avgValue' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
-          </div>
-          <div onClick={() => handleSort('todayClicks')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            {includeYesterday ? 'Avg Clicks' : 'Today Clicks'} {sortBy === 'todayClicks' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
-          </div>
-          <div onClick={() => handleSort('todayConversions')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            {includeYesterday ? 'Avg Convs' : 'Today Convs'} {sortBy === 'todayConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
-          </div>
-          <div onClick={() => handleSort('todayValue')} style={{ flex: 0.6, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            {includeYesterday ? 'Avg CVR' : 'Today CVR'} {sortBy === 'todayValue' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
-          </div>
-          <div onClick={() => handleSort('changePercent')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
-            Change {sortBy === 'changePercent' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+      {/* Table Header - Desktop Only */}
+      {!isMobile && (
+        <div style={{ padding: '16px 20px 12px', background: theme.bg }}>
+          <div style={{ display: 'flex', gap: '12px', padding: '12px 16px', background: theme.bgSecondary, borderRadius: '10px 10px 0 0', border: `1px solid ${theme.border}`, borderBottom: 'none' }}>
+            <div style={{ flex: 2.5, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Campaign / Publisher</div>
+            <div onClick={() => handleSort('status')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+              Status {sortBy === 'status' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+            </div>
+            <div onClick={() => handleSort('baselineClicks')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+              Base Clicks {sortBy === 'baselineClicks' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+            </div>
+            <div onClick={() => handleSort('baselineConversions')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+              Base Convs {sortBy === 'baselineConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+            </div>
+            <div onClick={() => handleSort('avgValue')} style={{ flex: 0.6, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+              Base CVR {sortBy === 'avgValue' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+            </div>
+            <div onClick={() => handleSort('todayClicks')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+              {includeYesterday ? 'Avg Clicks' : 'Today Clicks'} {sortBy === 'todayClicks' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+            </div>
+            <div onClick={() => handleSort('todayConversions')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+              {includeYesterday ? 'Avg Convs' : 'Today Convs'} {sortBy === 'todayConversions' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+            </div>
+            <div onClick={() => handleSort('todayValue')} style={{ flex: 0.6, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+              {includeYesterday ? 'Avg CVR' : 'Today CVR'} {sortBy === 'todayValue' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+            </div>
+            <div onClick={() => handleSort('changePercent')} style={{ flex: 0.7, fontSize: '10px', fontWeight: '700', color: theme.textSecondary, textTransform: 'uppercase', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+              Change {sortBy === 'changePercent' && <span style={{ fontSize: '12px' }}>{sortAsc ? '↑' : '↓'}</span>}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Table Rows */}
-      <div style={{ padding: '0 20px 20px', background: theme.bg }}>
-        {sortedData.map((row, idx) => {
-          const status = getStatus(row.changePercent);
-          const colors = getStatusColor(status);
-          const statusConfig = {
-            scrub: { label: '🚨 Alert', color: '#dc2626' },
-            warning: { label: '⚠️ Watch', color: '#d97706' },
-            healthy: { label: '✅ Good', color: '#16a34a' }
-          };
-          return (
-            <div key={row.id} style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '16px',
-              background: theme.bgSecondary,
-              border: `1px solid ${theme.border}`,
-              borderTop: idx === 0 ? `1px solid ${theme.border}` : 'none',
-              borderRadius: idx === 0 ? '0' : '0',
-              transition: 'all 0.2s',
-            }}>
-              <div style={{ flex: 2.5 }}>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: theme.text, marginBottom: '4px' }}>{row.campaign}</div>
-                <div style={{ fontSize: '12px', color: theme.textSecondary }}>{row.publisher}</div>
-              </div>
-              <div style={{ flex: 0.7, textAlign: 'center' }}>
-                <span style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '11px',
-                  fontWeight: '700',
-                  color: statusConfig[status].color,
-                  background: `${statusConfig[status].color}15`,
-                  padding: '6px 10px',
-                  borderRadius: '6px',
-                  border: `1px solid ${statusConfig[status].color}40`,
-                }}>
-                  {statusConfig[status].label}
-                </span>
-              </div>
-              <div style={{ flex: 0.7, textAlign: 'right' }}>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>
-                  {row.baselineClicks?.toLocaleString() || 0}
+      {/* Mobile Sort Bar */}
+      {isMobile && (
+        <div style={{ padding: '12px', background: theme.bg }}>
+          <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px' }}>
+            {[
+              { key: 'changePercent', label: 'Change' },
+              { key: 'todayClicks', label: 'Clicks' },
+              { key: 'todayValue', label: 'CVR' },
+            ].map(({ key, label }) => (
+              <button key={key} onClick={() => handleSort(key)} style={{
+                padding: '6px 12px', background: sortBy === key ? '#3b82f6' : theme.bgSecondary,
+                border: `1px solid ${sortBy === key ? '#3b82f6' : theme.border}`, borderRadius: '6px',
+                color: sortBy === key ? '#fff' : theme.textSecondary, fontSize: '11px', fontWeight: '600',
+                whiteSpace: 'nowrap', cursor: 'pointer',
+              }}>
+                {label} {sortBy === key && (sortAsc ? '↑' : '↓')}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Table Rows - Desktop */}
+      {!isMobile && (
+        <div style={{ padding: '0 20px 20px', background: theme.bg }}>
+          {sortedData.map((row, idx) => {
+            const status = getStatus(row.changePercent);
+            const colors = getStatusColor(status);
+            const statusConfig = {
+              scrub: { label: '🚨 Alert', color: '#dc2626' },
+              warning: { label: '⚠️ Watch', color: '#d97706' },
+              healthy: { label: '✅ Good', color: '#16a34a' }
+            };
+            return (
+              <div key={row.id} style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '16px',
+                background: theme.bgSecondary,
+                border: `1px solid ${theme.border}`,
+                borderTop: idx === 0 ? `1px solid ${theme.border}` : 'none',
+                borderRadius: idx === 0 ? '0' : '0',
+                transition: 'all 0.2s',
+              }}>
+                <div style={{ flex: 2.5 }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: theme.text, marginBottom: '4px' }}>{row.campaign}</div>
+                  <div style={{ fontSize: '12px', color: theme.textSecondary }}>{row.publisher}</div>
                 </div>
-                <div style={{ fontSize: '10px', color: theme.textMuted, marginTop: '2px' }}>
-                  (avg/day)
+                <div style={{ flex: 0.7, textAlign: 'center' }}>
+                  <span style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    color: statusConfig[status].color,
+                    background: `${statusConfig[status].color}15`,
+                    padding: '6px 10px',
+                    borderRadius: '6px',
+                    border: `1px solid ${statusConfig[status].color}40`,
+                  }}>
+                    {statusConfig[status].label}
+                  </span>
+                </div>
+                <div style={{ flex: 0.7, textAlign: 'right' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>
+                    {row.baselineClicks?.toLocaleString() || 0}
+                  </div>
+                  <div style={{ fontSize: '10px', color: theme.textMuted, marginTop: '2px' }}>
+                    (avg/day)
+                  </div>
+                </div>
+                <div style={{ flex: 0.7, textAlign: 'right' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>
+                    {row.baselineConversions?.toLocaleString() || 0}
+                  </div>
+                  <div style={{ fontSize: '10px', color: theme.textMuted, marginTop: '2px' }}>
+                    (avg/day)
+                  </div>
+                </div>
+                <div style={{ flex: 0.6, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>
+                  {activeTab === 'scrub' ? `${row.avgValue}%` : row.avgValue.toLocaleString()}
+                </div>
+                <div style={{ flex: 0.7, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
+                  {row.todayClicks?.toLocaleString() || 0}
+                </div>
+                <div style={{ flex: 0.7, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
+                  {row.todayConversions?.toLocaleString() || 0}
+                </div>
+                <div style={{ flex: 0.6, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
+                  {activeTab === 'scrub' ? `${row.todayValue}%` : row.todayValue.toLocaleString()}
+                </div>
+                <div style={{ flex: 0.7, textAlign: 'right' }}>
+                  <span style={{
+                    display: 'inline-block',
+                    padding: '6px 12px',
+                    background: row.changePercent >= 0 ? 'rgba(34,197,94,0.15)' : 'rgba(220,38,38,0.15)',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    color: row.changePercent >= 0 ? '#16a34a' : '#dc2626',
+                    border: `1px solid ${row.changePercent >= 0 ? 'rgba(34,197,94,0.3)' : 'rgba(220,38,38,0.3)'}`,
+                  }}>
+                    {row.changePercent > 0 ? '+' : ''}{row.changePercent}%
+                  </span>
                 </div>
               </div>
-              <div style={{ flex: 0.7, textAlign: 'right' }}>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>
-                  {row.baselineConversions?.toLocaleString() || 0}
+            );
+          })}
+        </div>
+      )}
+
+      {/* Mobile Cards */}
+      {isMobile && (
+        <div style={{ padding: '0 12px 12px', background: theme.bg }}>
+          {sortedData.map((row) => {
+            const status = getStatus(row.changePercent);
+            const statusConfig = {
+              scrub: { label: '🚨', color: '#dc2626' },
+              warning: { label: '⚠️', color: '#d97706' },
+              healthy: { label: '✅', color: '#16a34a' }
+            };
+            return (
+              <div key={row.id} style={{
+                padding: '12px',
+                background: theme.bgSecondary,
+                border: `1px solid ${theme.border}`,
+                borderLeft: `4px solid ${statusConfig[status].color}`,
+                borderRadius: '10px',
+                marginBottom: '8px',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: theme.text, marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.campaign}</div>
+                    <div style={{ fontSize: '11px', color: theme.textSecondary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.publisher}</div>
+                  </div>
+                  <span style={{
+                    padding: '4px 8px',
+                    background: row.changePercent >= 0 ? 'rgba(34,197,94,0.15)' : 'rgba(220,38,38,0.15)',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    color: row.changePercent >= 0 ? '#16a34a' : '#dc2626',
+                    marginLeft: '8px',
+                    flexShrink: 0,
+                  }}>
+                    {row.changePercent > 0 ? '+' : ''}{row.changePercent}%
+                  </span>
                 </div>
-                <div style={{ fontSize: '10px', color: theme.textMuted, marginTop: '2px' }}>
-                  (avg/day)
+                <div style={{ display: 'flex', gap: '12px', fontSize: '11px' }}>
+                  <div>
+                    <span style={{ color: theme.textMuted }}>Base: </span>
+                    <span style={{ color: theme.textSecondary, fontWeight: '600' }}>{activeTab === 'scrub' ? `${row.avgValue}%` : row.avgValue}</span>
+                  </div>
+                  <div>
+                    <span style={{ color: theme.textMuted }}>Now: </span>
+                    <span style={{ color: theme.text, fontWeight: '600' }}>{activeTab === 'scrub' ? `${row.todayValue}%` : row.todayValue}</span>
+                  </div>
+                  <div>
+                    <span style={{ color: theme.textMuted }}>Clicks: </span>
+                    <span style={{ color: theme.text, fontWeight: '600' }}>{row.todayClicks?.toLocaleString() || 0}</span>
+                  </div>
                 </div>
               </div>
-              <div style={{ flex: 0.6, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.textSecondary }}>
-                {activeTab === 'scrub' ? `${row.avgValue}%` : row.avgValue.toLocaleString()}
-              </div>
-              <div style={{ flex: 0.7, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
-                {row.todayClicks?.toLocaleString() || 0}
-              </div>
-              <div style={{ flex: 0.7, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
-                {row.todayConversions?.toLocaleString() || 0}
-              </div>
-              <div style={{ flex: 0.6, textAlign: 'right', fontSize: '14px', fontWeight: '600', color: theme.text }}>
-                {activeTab === 'scrub' ? `${row.todayValue}%` : row.todayValue.toLocaleString()}
-              </div>
-              <div style={{ flex: 0.7, textAlign: 'right' }}>
-                <span style={{
-                  display: 'inline-block',
-                  padding: '6px 12px',
-                  background: row.changePercent >= 0 ? 'rgba(34,197,94,0.15)' : 'rgba(220,38,38,0.15)',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: '700',
-                  color: row.changePercent >= 0 ? '#16a34a' : '#dc2626',
-                  border: `1px solid ${row.changePercent >= 0 ? 'rgba(34,197,94,0.3)' : 'rgba(220,38,38,0.3)'}`,
-                }}>
-                  {row.changePercent > 0 ? '+' : ''}{row.changePercent}%
-                </span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
         </>
       )}
 
